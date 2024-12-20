@@ -12,21 +12,22 @@ struct LectureRecordCard: View {
         HStack {
             // Play Button
             Button(action: {
+                print("Play Button Pressed")
                 // Add play button functionality here
             }) {
                 Image(systemName: "play.circle.fill")
                     .resizable()
-                    .foregroundColor(.blue)
-                    .frame(width: 40, height: 40)
+                    .foregroundColor(.icon)
+                    .frame(width: 50, height: 50)
             }
             .padding(.leading, 16)
 
             Spacer()
         }
-        .frame(width: 363, height: 119)
-        .background(Color.white)
+        .frame(width: 360, height: 110)
+        .background(Color.background)
         .cornerRadius(16)
-        .shadow(radius: 24)
+        .shadow(radius: 12)
     }
 }
 

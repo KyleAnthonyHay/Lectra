@@ -9,7 +9,11 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        LectureRecordCard()
+        VStack (spacing: 30) {
+            LectureRecordCard()
+            GenerateNotesCard()
+        }
+        
     }
 }
 
