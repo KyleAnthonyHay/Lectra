@@ -9,11 +9,14 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack (spacing: 30) {
-            LectureRecordCard()
-            GenerateNotesCard()
+        ScrollView {
+            VStack(spacing: 30) {
+                LectureRecordCard()
+                GenerateNotesCard()
+                DisplayNotesCard()
+            }
+            .padding() // Add padding to avoid edge clipping
         }
-        
     }
 }
 
