@@ -15,9 +15,22 @@
 		850B32752D1531C1003B286F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		85AFEFAF2D163D76007FAEF8 /* Exceptions for "Lectra" folder in "Lectra" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 850B32632D152FD5003B286F /* Lectra */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		850B32662D152FD5003B286F /* Lectra */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				85AFEFAF2D163D76007FAEF8 /* Exceptions for "Lectra" folder in "Lectra" target */,
+			);
 			path = Lectra;
 			sourceTree = "<group>";
 		};
@@ -262,6 +275,7 @@
 				DEVELOPMENT_TEAM = J5NW26ADGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Lectra/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -291,6 +305,7 @@
 				DEVELOPMENT_TEAM = J5NW26ADGW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Lectra/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
