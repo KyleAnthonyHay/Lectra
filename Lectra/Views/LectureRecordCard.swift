@@ -41,7 +41,7 @@ struct LectureRecordCard: View {
     private func configureAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+            try session.setCategory(.playAndRecord, mode: .default, options: [.mixWithOthers])
             try session.setActive(true)
             print("Audio session configured successfully")
         } catch {
