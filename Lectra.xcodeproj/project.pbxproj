@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		850B32762D1531C1003B286F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 850B32752D1531C1003B286F /* README.md */; };
+		858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 858C60FE2D19D8D1002E041D /* XCAOpenAIClient */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +86,7 @@
 			);
 			name = Lectra;
 			packageProductDependencies = (
+				858C60FE2D19D8D1002E041D /* XCAOpenAIClient */,
 			);
 			productName = Lectra;
 			productReference = 850B32642D152FD5003B286F /* Lectra.app */;
@@ -113,6 +116,9 @@
 			);
 			mainGroup = 850B325B2D152FD5003B286F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 850B32652D152FD5003B286F /* Products */;
 			projectDirPath = "";
@@ -346,6 +352,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/alfianlosari/XCAOpenAIClient.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		858C60FE2D19D8D1002E041D /* XCAOpenAIClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */;
+			productName = XCAOpenAIClient;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 850B325C2D152FD5003B286F /* Project object */;
 }
