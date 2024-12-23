@@ -15,7 +15,7 @@ struct ContentView: View {
                 GenerateNotesCard()
                 DisplayNotesCard()
             }
-            .padding() // Add padding to avoid edge clipping
+            .padding()
         }
     }
 }
