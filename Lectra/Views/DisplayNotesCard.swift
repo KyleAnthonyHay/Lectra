@@ -34,6 +34,7 @@ struct DisplayNotesCard: View {
                     .foregroundColor(.textSet)
                     .padding(.leading, 20)
                     .padding(.top, 20)
+                    .padding(.bottom, 10)
 
                 // GPT Response
                 Text(gptResponse)
