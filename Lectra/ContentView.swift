@@ -25,7 +25,7 @@ struct ContentView: View {
                 )
 
                 // DisplayNotesCard with optional gptResponse
-//                DisplayNotesCard(gptResponse: gptResponse)
+                DisplayNotesCard(gptResponse: gptResponse)
             }
             .padding()
         }

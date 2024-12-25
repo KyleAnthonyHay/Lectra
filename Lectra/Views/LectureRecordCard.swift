@@ -12,7 +12,7 @@ struct LectureRecordCard: View {
     @ObservedObject var audioManager: AudioRecorderManager
 
     var body: some View {
-        HStack {
+        HStack(spacing: 25) {
             // Record/Stop Button
             Button(action: {
                 audioManager.isRecording ? audioManager.stopRecording() : audioManager.startRecording()
@@ -24,18 +24,17 @@ struct LectureRecordCard: View {
             }
             .padding(.leading, 16)
 
-            Spacer()
-
             // Playback Button
             Button(action: {
                 audioManager.isPlaying ? audioManager.stopAudio() : audioManager.playAudio()
             }) {
                 Image(systemName: audioManager.isPlaying ? "stop.fill" : "play.fill")
                     .resizable()
-                    .foregroundColor(audioManager.isPlaying ? .blue : .icon)
+                    .foregroundColor(audioManager.isPlaying ? .icon : .icon)
                     .frame(width: 40, height: 40)
             }
-            .padding(.trailing, 16)
+            .padding(.trailing, 25)
+            Spacer()
         }
         .frame(width: 360, height: 110)
         .background(Color.background)
