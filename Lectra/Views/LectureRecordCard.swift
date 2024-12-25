@@ -11,6 +11,8 @@ import AVFoundation
 struct LectureRecordCard: View {
     @State private var audioRecorder: AVAudioRecorder?
     @State private var isRecording = false
+    
+    let openAIClient = OpenAIClientWrapper()
 
     var body: some View {
         HStack {
@@ -84,7 +86,29 @@ struct LectureRecordCard: View {
         audioRecorder?.stop()
         isRecording = false
         print("Recording stopped successfully")
+        
+        if let audioURL = audioRecorder?.url {
+            do {
+                let audioData = try Data(contentsOf: audioURL)
+                let task = openAIClient.processSpeechTask(audioData: audioData)
+                
+                Task {
+                    do {
+                        let result = try await task.value // Wait for the transcription
+                        print("Transcription Result: \(result)") // Print to terminal
+                    } catch {
+                        print("Error processing speech: \(error.localizedDescription)")
+                    }
+                }
+            } catch {
+                print("Failed to load audio data: \(error.localizedDescription)")
+            }
+        } else {
+            print("Audio recorder URL is nil")
+        }
     }
+
+
 
     private func listDocumentFiles() {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
