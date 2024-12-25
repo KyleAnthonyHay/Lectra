@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		850B32762D1531C1003B286F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 850B32752D1531C1003B286F /* README.md */; };
 		858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 858C60FE2D19D8D1002E041D /* XCAOpenAIClient */; };
+		85DF7C0D2D1C5B0C00D64075 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */,
+				85DF7C0D2D1C5B0C00D64075 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +89,7 @@
 			name = Lectra;
 			packageProductDependencies = (
 				858C60FE2D19D8D1002E041D /* XCAOpenAIClient */,
+				85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */,
 			);
 			productName = Lectra;
 			productReference = 850B32642D152FD5003B286F /* Lectra.app */;
@@ -118,6 +121,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */,
+				85DF7C0B2D1C5B0C00D64075 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 850B32652D152FD5003B286F /* Products */;
@@ -362,6 +366,14 @@
 				kind = branch;
 			};
 		};
+		85DF7C0B2D1C5B0C00D64075 /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/MarkdownUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -369,6 +381,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */;
 			productName = XCAOpenAIClient;
+		};
+		85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 85DF7C0B2D1C5B0C00D64075 /* XCRemoteSwiftPackageReference "MarkdownUI" */;
+			productName = MarkdownUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
