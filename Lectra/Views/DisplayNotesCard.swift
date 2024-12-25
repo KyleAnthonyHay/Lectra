@@ -1,23 +1,33 @@
 import SwiftUI
+import MarkdownUI
 
 struct DisplayNotesCard: View {
-    @State private var gptResponse: String = """
-        This is an example of a GPT-generated response. The generated text will dynamically resize the card vertically, allowing users to view all the content without scrolling. The card itself adjusts based on the length of the text.
+    @State private var defaultResponse: String = """
+        # Kyle Anthony - Software Developer and Videographer/Photographer
 
-        By leveraging SwiftUI's flexibility, this layout ensures the Save button remains at the very bottom, even as the content grows. This approach enhances usability and visual appeal for longer pieces of text.
+        ## Personal Information
 
-        For instance, imagine you're taking notes during a lecture or summarizing a detailed conversation. The text may span several paragraphs, and this card is designed to accommodate that seamlessly. Here's another line to make this example more realistic.
-        
-        The goal is to maintain a clean, structured layout without compromising on readability or accessibility.
-        
-        This is an example of a GPT-generated response. The generated text will dynamically resize the card vertically, allowing users to view all the content without scrolling. The card itself adjusts based on the length of the text.
+        - Experience:
+          - 5 years of experience in Videography and Photography
+          - 4 years of experience in Software Development
+          
+        ## Professional Experiences
 
-        By leveraging SwiftUI's flexibility, this layout ensures the Save button remains at the very bottom, even as the content grows. This approach enhances usability and visual appeal for longer pieces of text.
+        1. ### Videography and Photography
 
-        For instance, imagine you're taking notes during a lecture or summarizing a detailed conversation. The text may span several paragraphs, and this card is designed to accommodate that seamlessly. Here's another line to make this example more realistic.
-        
-        The goal is to maintain a clean, structured layout without compromising on readability or accessibility.
+            - 5 years of Professional Experience
+            - Owns a Production Company
+
+        2. ### Software Development
+
+            - 4 years of Experience
+            - Currently looking for a Job in Tech
+
+        ## Ownership
+
+        - Owns a Production Company
         """
+    var gptResponse: String?
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -29,15 +39,15 @@ struct DisplayNotesCard: View {
             // Content
             VStack(alignment: .leading, spacing: 10) {
                 // Header Text
-                Text("Notes")
-                    .font(.custom("Inter", size: 28).weight(.bold))
-                    .foregroundColor(.textSet)
-                    .padding(.leading, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 10)
+//                Text("Notes")
+//                    .font(.custom("Inter", size: 28).weight(.bold))
+//                    .foregroundColor(.textSet)
+//                    .padding(.leading, 20)
+//                    .padding(.top, 20)
+//                    .padding(.bottom, 10)
 
-                // GPT Response
-                Text(gptResponse)
+                // GPT Response or Default Text
+                Markdown(gptResponse ?? defaultResponse)
                     .font(.custom("Inter", size: 16))
                     .foregroundColor(.textSet)
                     .padding(.horizontal, 20)
@@ -71,5 +81,5 @@ struct DisplayNotesCard: View {
 }
 
 #Preview {
-    DisplayNotesCard()
+    DisplayNotesCard(gptResponse: nil) // Preview with default text
 }
