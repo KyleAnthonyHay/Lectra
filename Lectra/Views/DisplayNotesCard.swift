@@ -55,6 +55,10 @@ struct DisplayNotesCard: View {
                 // Save Button
                 Button(action: {
                     // Add action here
+                    let markdown = gptResponse ?? defaultResponse
+                    saveMarkdownAsPDF(markdown: markdown) // Save as PDF
+//                    saveMarkdownAsDocx(markdown: markdown) // Save as DOCX
+                    
                     print("Save button tapped")
                 }) {
                     Image(systemName: "square.and.arrow.down")
