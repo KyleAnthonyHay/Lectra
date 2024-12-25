@@ -48,10 +48,9 @@ struct DisplayNotesCard: View {
 
                 // GPT Response or Default Text
                 Markdown(gptResponse ?? defaultResponse)
-                    .font(.custom("Inter", size: 16))
-                    .foregroundColor(.textSet)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+                    .markdownTheme(.gitHub)
+                    .textSelection(.enabled)
+                    .padding(20)
 
                 // Save Button
                 Button(action: {

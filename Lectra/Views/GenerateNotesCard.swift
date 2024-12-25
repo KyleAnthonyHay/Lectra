@@ -60,6 +60,7 @@ struct GenerateNotesCard: View {
     }
 
     private func generateNotes() {
+        print("Generate Button Pressed")
         do {
             let audioData = try audioManager.getAudioData() // Fetch audio data
             let task = openAIClient.processSpeechTask(audioData: audioData)

@@ -30,7 +30,7 @@ class OpenAIClientWrapper {
         client = OpenAIClient(apiKey: apiKey)
     }
     
-    let returnMarkdown: String = "Make well organized notes about this lecture in markdown format. Also inculde a title for the notes. Include Categories and Subcategories where necessary."
+    let returnMarkdown: String = "Make well organized notes of audio in markdown format. Inculde a short title for the notes as well as Categories and Subcategories where necessary."
     
     enum AudioProcessingState {
         case idle
