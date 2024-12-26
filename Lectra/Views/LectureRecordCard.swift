@@ -13,7 +13,7 @@ struct LectureRecordCard: View {
 
     var body: some View {
         HStack(spacing: 25) {
-            // Record/Stop Button
+            // MARK: Record/Stop Button
             Button(action: {
                 audioManager.isRecording ? audioManager.stopRecording() : audioManager.startRecording()
             }) {
@@ -24,7 +24,7 @@ struct LectureRecordCard: View {
             }
             .padding(.leading, 16)
 
-            // Playback Button
+            // MARK: Playback Button
             Button(action: {
                 audioManager.isPlaying ? audioManager.stopAudio() : audioManager.playAudio()
             }) {

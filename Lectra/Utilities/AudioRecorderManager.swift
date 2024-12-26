@@ -4,14 +4,29 @@ import AVFoundation
 class AudioRecorderManager: NSObject, ObservableObject {
     private var audioRecorder: AVAudioRecorder?
     private var audioPlayer: AVAudioPlayer?
-    private let audioFileURL: URL
+    private var audioFileURL: URL
 
     @Published var isRecording = false
     @Published var isPlaying = false
 
     override init() {
+        // Set the path to Documents/Transcriptions
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        audioFileURL = documentsDirectory.appendingPathComponent("Lecture-Recording.m4a")
+        let transcriptionDirectory = documentsDirectory.appendingPathComponent("Transcriptions")
+
+        // Ensure the directory exists
+        if !FileManager.default.fileExists(atPath: transcriptionDirectory.path) {
+            do {
+                try FileManager.default.createDirectory(at: transcriptionDirectory, withIntermediateDirectories: true, attributes: nil)
+                print("Transcriptions directory created")
+            } catch {
+                print("Failed to create Transcriptions directory: \(error.localizedDescription)")
+            }
+        }
+
+        // Define the file path for recordings
+        audioFileURL = transcriptionDirectory.appendingPathComponent("Lecture-Recording.m4a")
+
         super.init()
         configureAudioSession()
     }
@@ -40,7 +55,7 @@ class AudioRecorderManager: NSObject, ObservableObject {
             audioRecorder?.prepareToRecord()
             audioRecorder?.record()
             isRecording = true
-            print("Recording started successfully")
+            print("Recording started successfully at \(audioFileURL.path)")
         } catch {
             print("Error starting recording: \(error.localizedDescription)")
         }
@@ -49,7 +64,7 @@ class AudioRecorderManager: NSObject, ObservableObject {
     func stopRecording() {
         audioRecorder?.stop()
         isRecording = false
-        print("Recording stopped successfully")
+        print("Recording stopped successfully. File saved at \(audioFileURL.path)")
     }
 
     func playAudio() {
@@ -86,3 +101,4 @@ extension AudioRecorderManager: AVAudioPlayerDelegate {
         print("Audio playback finished")
     }
 }
+

@@ -15,6 +15,9 @@ struct RecordView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 30) {
+                Text("Record")
+                    .font(.largeTitle)
+                    .padding()
                 LectureRecordCard(audioManager: audioManager)
                 GenerateNotesCard(audioManager: audioManager, openAIClient: openAIClient)
                 DisplayNotesCard(gptResponse: gptResponse)

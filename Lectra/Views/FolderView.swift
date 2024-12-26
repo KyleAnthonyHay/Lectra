@@ -10,7 +10,7 @@ import SwiftUI
 struct FolderView: View {
     var body: some View {
         VStack {
-            Text("Folder View")
+            Text("Folders")
                 .font(.largeTitle)
                 .padding()
             Spacer()
