@@ -12,12 +12,12 @@ class AudioRecorderManager: NSObject, ObservableObject {
     override init() {
         // Set the path to Documents/Transcriptions
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let transcriptionDirectory = documentsDirectory.appendingPathComponent("Transcriptions")
+        let audioRecordingDirectory = documentsDirectory.appending(path: "AudioRecordings")
 
         // Ensure the directory exists
-        if !FileManager.default.fileExists(atPath: transcriptionDirectory.path) {
+        if !FileManager.default.fileExists(atPath: audioRecordingDirectory.path) {
             do {
-                try FileManager.default.createDirectory(at: transcriptionDirectory, withIntermediateDirectories: true, attributes: nil)
+                try FileManager.default.createDirectory(at: audioRecordingDirectory, withIntermediateDirectories: true, attributes: nil)
                 print("Transcriptions directory created")
             } catch {
                 print("Failed to create Transcriptions directory: \(error.localizedDescription)")
@@ -25,7 +25,7 @@ class AudioRecorderManager: NSObject, ObservableObject {
         }
 
         // Define the file path for recordings
-        audioFileURL = transcriptionDirectory.appendingPathComponent("Lecture-Recording.m4a")
+        audioFileURL = audioRecordingDirectory.appendingPathComponent("Lecture-Recording.m4a")
 
         super.init()
         configureAudioSession()
