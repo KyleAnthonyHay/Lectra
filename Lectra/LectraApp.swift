@@ -11,7 +11,8 @@ import SwiftUI
 struct LectraApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTabView()
         }
     }
 }
+

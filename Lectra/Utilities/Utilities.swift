@@ -17,10 +17,24 @@ func saveMarkdownAsPDF(markdown: String) {
         attributedString.draw(in: CGRect(x: 20, y: 20, width: 572, height: 752)) // With margins
     }
     
-    // Save PDF to documents directory
+    // Set up the Transcriptions directory
     let fileManager = FileManager.default
     let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    let pdfURL = documentsURL.appendingPathComponent("Notes.pdf")
+    let transcriptionsDirectory = documentsURL.appendingPathComponent("Transcriptions")
+
+    // Ensure the Transcriptions directory exists
+    if !fileManager.fileExists(atPath: transcriptionsDirectory.path) {
+        do {
+            try fileManager.createDirectory(at: transcriptionsDirectory, withIntermediateDirectories: true, attributes: nil)
+            print("Transcriptions directory created at \(transcriptionsDirectory.path)")
+        } catch {
+            print("Failed to create Transcriptions directory: \(error.localizedDescription)")
+            return
+        }
+    }
+
+    // Define the file path for the PDF
+    let pdfURL = transcriptionsDirectory.appendingPathComponent("Notes.pdf")
     
     do {
         try pdfData.write(to: pdfURL)

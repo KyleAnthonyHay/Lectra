@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct RecordView: View {
     private let audioManager = AudioRecorderManager()
     private let openAIClient = OpenAIClientWrapper()
     @State private var gptResponse: String? = nil // Shared state for notes
@@ -15,16 +15,11 @@ struct ContentView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 30) {
-                // Pass audioManager to LectureRecordCard
+                Text("Record")
+                    .font(.largeTitle)
+                    .padding()
                 LectureRecordCard(audioManager: audioManager)
-
-                // GenerateNotesCard with gptResponse state
-                GenerateNotesCard(
-                    audioManager: audioManager,
-                    openAIClient: openAIClient
-                )
-
-                // DisplayNotesCard with optional gptResponse
+                GenerateNotesCard(audioManager: audioManager, openAIClient: openAIClient)
                 DisplayNotesCard(gptResponse: gptResponse)
             }
             .padding()
@@ -32,8 +27,7 @@ struct ContentView: View {
     }
 }
 
-
-
 #Preview {
-    ContentView()
+    RecordView()
 }
+
