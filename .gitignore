@@ -1,2 +1,5 @@
 # Ignore .xcconfig
 *.xcconfig
+*.xcuserstate
+.DS_Store
+
