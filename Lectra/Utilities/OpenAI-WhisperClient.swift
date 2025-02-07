@@ -12,22 +12,23 @@ class OpenAIClientWrapper {
     private let client: OpenAIClient
 
     init() {
-        // Debugging: Check if the API key is loaded correctly
+        // MARK: Debugging: Check if the API key is loaded correctly
         if let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] {
-            print("API Key from environment: \(apiKey)")
+            print("API Key has been accessed from environment/schema: \(apiKey)")
         } else if let apiKey = Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String {
-            print("API Key from Info.plist: \(apiKey)")
+            print("API Key has been accesed from Info.plist: \(apiKey)")
         } else {
             print("API Key not found in either environment or Info.plist.")
         }
 
-        // Access API key from Info.plist or environment variables
-        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ??
+        // MARK: Access API key from Info.plist or environment variables
+        guard let rawApiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ??
                            Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String else {
-            fatalError("Error")
+            fatalError("Error Creating apiKey Variable")
         }
-        print("Loaded API Key: \(apiKey)")
-        client = OpenAIClient(apiKey: apiKey)
+        let cleanedApiKey = rawApiKey.trimmingCharacters(in: CharacterSet(charactersIn: "\""))  // removes the quotes("")
+        print("Cleaned API Key: \(cleanedApiKey)")  // Debugging statement
+        client = OpenAIClient(apiKey: cleanedApiKey)
     }
     
     let returnMarkdown: String = "Make well organized notes of audio in markdown format. Inculde a short title for the notes as well as Categories and Subcategories where necessary."
