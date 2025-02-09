@@ -10,7 +10,8 @@ import SwiftUI
 struct MainTabView: View {
     var body: some View {
         TabView {
-            FolderView()
+            // !!!: Add Swift Data Root Directory Object
+            FolderView(rootDirectory: PreviewData.rootDirectory)
                 .tabItem {
                     Label("Folder", systemImage: "folder")
                 }
