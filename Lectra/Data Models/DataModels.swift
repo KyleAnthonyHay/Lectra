@@ -19,8 +19,8 @@ class AudioFile {
     var name: String
     var audioData: Data
     
-    init(id: UUID, name: String, audioData: Data) {
-        self.id = UUID()
+    init(id: UUID = UUID(), name: String, audioData: Data) {
+        self.id = id
         self.name = name
         self.audioData = audioData
     }
@@ -39,8 +39,8 @@ class Transcription {
     @Relationship var associatedAudioFile: AudioFile
     var text: String
     
-    init(id: UUID, associatedAudioFile: AudioFile, text: String) {
-        self.id = UUID()
+    init(id: UUID = UUID(), associatedAudioFile: AudioFile, text: String) {
+        self.id = id
         self.associatedAudioFile = associatedAudioFile
         self.text = text
     }
@@ -52,8 +52,8 @@ class TranscriptionTuple {
     @Relationship var audioFile: AudioFile
     @Relationship var transcription: Transcription
     
-    init(id: UUID, audioFile: AudioFile, transcription: Transcription) {
-        self.id = UUID()
+    init(id: UUID = UUID(), audioFile: AudioFile, transcription: Transcription) {
+        self.id = id
         self.audioFile = audioFile
         self.transcription = transcription
     }

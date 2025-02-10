@@ -13,13 +13,13 @@ class OpenAIClientWrapper {
 
     init() {
         // MARK: Debugging: Check if the API key is loaded correctly
-        if let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] {
-            print("API Key has been accessed from environment/schema: \(apiKey)")
-        } else if let apiKey = Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String {
-            print("API Key has been accesed from Info.plist: \(apiKey)")
-        } else {
-            print("API Key not found in either environment or Info.plist.")
-        }
+//        if let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] {
+//            print("API Key has been accessed from environment/schema: \(apiKey)")
+//        } else if let apiKey = Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String {
+//            print("API Key has been accesed from Info.plist: \(apiKey)")
+//        } else {
+//            print("API Key not found in either environment or Info.plist.")
+//        }
 
         // MARK: Access API key from Info.plist or environment variables
         guard let rawApiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ??
@@ -27,7 +27,7 @@ class OpenAIClientWrapper {
             fatalError("Error Creating apiKey Variable")
         }
         let cleanedApiKey = rawApiKey.trimmingCharacters(in: CharacterSet(charactersIn: "\""))  // removes the quotes("")
-        print("Cleaned API Key: \(cleanedApiKey)")  // Debugging statement
+//        print("Cleaned API Key: \(cleanedApiKey)")  // Debugging statement
         client = OpenAIClient(apiKey: cleanedApiKey)
     }
     

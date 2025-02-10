@@ -5,14 +5,18 @@ import SwiftData
 
 struct FolderView: View {
     //Basic UI Implementation
-    @State private var folders: [String] = ["All Files"] // Default folder
     @State private var isShowingNewFolderDialog = false
     @State private var newFolderName = ""
     
-    // Swift Data Implementation
+    // MARK: Swift Data Implementation
     @Environment(\.modelContext) private var modelContext
     let rootDirectory: RootDirectory
-
+    
+    private var folderManager: FolderManager {
+        FolderManager(modelContext: modelContext, rootDirectory: rootDirectory)
+    }
+    
+    // MARK: UI
     var body: some View {
         NavigationView {
             VStack {
@@ -20,9 +24,9 @@ struct FolderView: View {
                     .font(.largeTitle)
                     .padding()
 
-                List(folders, id: \.self) { folder in
-                    NavigationLink(destination: FileListView(folder: folder)) {
-                        Text(folder)
+                List(rootDirectory.folders, id: \.self) { folder in
+                    NavigationLink(destination: FileListView(folder: folder.name)) {
+                        Text(folder.name)
                     }
                 }
                 .listStyle(PlainListStyle())
@@ -46,25 +50,11 @@ struct FolderView: View {
             NewFolderDialog(folderName: $newFolderName)
                 .onDisappear {
                     if !newFolderName.isEmpty {
-                        folders.append(newFolderName)
+//                        folders.append(newFolderName)
+                        folderManager.addNewFolder(named: newFolderName)
                         newFolderName = ""
                     }
                 }
-        }
-    }
-    /// We just added the addNewFolder function
-    ///     Time to better understand it as well as add the defult folder that should be initialized to the FolderView object in main tab view
-    ///     we also need to add that swift data object in this view. Good luck.
-    private func addNewFolder() {
-        let newFolder = Folder(name: "New Folder")
-        rootDirectory.folders.append(newFolder) // Add the folder to the RootDirectory
-        modelContext.insert(newFolder)
-        
-        do {
-            try modelContext.save()
-            print("Successfully added a new folder.")
-        } catch {
-            print("Failed to save new folder: \(error)")
         }
     }
 }
