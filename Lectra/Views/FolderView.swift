@@ -1,48 +1,94 @@
 // FolderView.swift
 
 import SwiftUI
+import SwiftData
 
 struct FolderView: View {
-    @State private var folders: [String] = ["All Files"] // Default folder
+    //Basic UI Implementation
     @State private var isShowingNewFolderDialog = false
     @State private var newFolderName = ""
-
+    // Record View
+    @State private var isShowingNewRecordingDialog = false
+    @State private var navigateToRecordView = false
+    @State private var newRecordingName = ""
+    
+    // MARK: Swift Data Implementation
+    @Environment(\.modelContext) private var modelContext
+    let rootDirectory: RootDirectory
+    
+    private var folderManager: FolderManager {
+        FolderManager(modelContext: modelContext, rootDirectory: rootDirectory)
+    }
+    
+    // MARK: UI
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Text("Folders")
                     .font(.largeTitle)
                     .padding()
-
-                List(folders, id: \.self) { folder in
-                    NavigationLink(destination: FileListView(folder: folder)) {
-                        Text(folder)
+                List {
+                    ForEach(rootDirectory.folders, id: \.id) { folder in
+                        NavigationLink(destination: FileListView(folder: folder.name)){
+                            Text(folder.name)
+                        }
+                    }
+                    .onDelete { offsets in
+                        folderManager.deleteFolders(at: offsets)
                     }
                 }
-                .listStyle(PlainListStyle())
-
-                Button(action: {
-                    isShowingNewFolderDialog = true
-                }) {
-                    HStack {
-                        Image(systemName: "folder.badge.plus")
-                        Text("New Folder")
+                
+                
+                HStack {
+                    // MARK: NEW FOLDER
+                    Button(action: {
+                            isShowingNewFolderDialog = true
+                        }) {
+                            HStack {
+                                Image(systemName: "folder.badge.plus")
+                                Text("New Folder")
+                            }
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                        }
+                        .padding()
+                    
+                    
+                    // MARK: NEW RECORDING
+                    Button(action: {
+                        isShowingNewRecordingDialog = true
+                        print("New View Button Pressed")
+                    }) {
+                        HStack {
+                            Image(systemName: "plus")
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }.navigationDestination(isPresented: $navigateToRecordView) {
+                        RecordView(tupleName: newRecordingName)
                     }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
                 }
-                .padding()
+ 
+                
             }
         }
         .sheet(isPresented: $isShowingNewFolderDialog) {
             NewFolderDialog(folderName: $newFolderName)
                 .onDisappear {
                     if !newFolderName.isEmpty {
-                        folders.append(newFolderName)
+                        folderManager.addNewFolder(named: newFolderName)
                         newFolderName = ""
                     }
+                }
+        }
+        .sheet(isPresented: $isShowingNewRecordingDialog) {
+            NewRecordingDialog(newRecordingName: $newRecordingName)
+                .onDisappear {
+                    navigateToRecordView = true
                 }
         }
     }
@@ -57,6 +103,7 @@ struct FileListView: View {
     }
 }
 
+
 #Preview {
-    FolderView()
+    FolderView(rootDirectory: PreviewData.rootDirectory)
 }

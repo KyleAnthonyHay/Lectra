@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		850B32762D1531C1003B286F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 850B32752D1531C1003B286F /* README.md */; };
 		858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 858C60FE2D19D8D1002E041D /* XCAOpenAIClient */; };
-		85AF03CD2D55899700F4BD9E /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 85AF03CC2D55899700F4BD9E /* Secrets.xcconfig */; };
 		85DF7C0D2D1C5B0C00D64075 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */; };
 /* End PBXBuildFile section */
 
@@ -106,7 +105,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1610;
-				LastUpgradeCheck = 1610;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					850B32632D152FD5003B286F = {
 						CreatedOnToolsVersion = 16.1;
@@ -141,7 +140,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				85AF03CD2D55899700F4BD9E /* Secrets.xcconfig in Resources */,
 				850B32762D1531C1003B286F /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
