@@ -24,12 +24,22 @@ struct FolderView: View {
                     .font(.largeTitle)
                     .padding()
 
-                List(rootDirectory.folders, id: \.self) { folder in
-                    NavigationLink(destination: FileListView(folder: folder.name)) {
-                        Text(folder.name)
+//                List(rootDirectory.folders, id: \.id) { folder in
+//                    NavigationLink(destination: FileListView(folder: folder.name)) {
+//                        Text(folder.name)
+//                    }
+//                }
+//                .listStyle(PlainListStyle())
+                List {
+                    ForEach(rootDirectory.folders, id: \.id) { folder in
+                        NavigationLink(destination: FileListView(folder: folder.name)){
+                            Text(folder.name)
+                        }
+                    }
+                    .onDelete { offsets in
+                        folderManager.deleteFolders(at: offsets)
                     }
                 }
-                .listStyle(PlainListStyle())
 
                 Button(action: {
                     isShowingNewFolderDialog = true

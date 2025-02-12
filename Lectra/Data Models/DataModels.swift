@@ -49,8 +49,8 @@ class Transcription {
 @Model
 class TranscriptionTuple {
     @Attribute(.unique) var id: UUID
-    @Relationship var audioFile: AudioFile
-    @Relationship var transcription: Transcription
+    @Relationship(deleteRule: .cascade) var audioFile: AudioFile
+    @Relationship(deleteRule: .cascade) var transcription: Transcription
     
     init(id: UUID = UUID(), audioFile: AudioFile, transcription: Transcription) {
         self.id = id
@@ -63,7 +63,7 @@ class TranscriptionTuple {
 class Folder {
     @Attribute(.unique) var id: UUID
     var name: String
-    @Relationship var transcriptionTuples: [TranscriptionTuple]
+    @Relationship(deleteRule: .cascade) var transcriptionTuples: [TranscriptionTuple]
     
     init(name: String, transcriptionTuples: [TranscriptionTuple] = []) {
         self.id = UUID()

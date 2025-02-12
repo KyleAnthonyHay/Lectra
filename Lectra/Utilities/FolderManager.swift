@@ -14,6 +14,7 @@ class FolderManager: ObservableObject {
         self.rootDirectory = rootDirectory
     }
     
+    // MARK: CRUD Operations
     func addNewFolder(named folderName: String) {
         let newFolder = Folder(name: folderName)
         rootDirectory.folders.append(newFolder)
@@ -23,6 +24,20 @@ class FolderManager: ObservableObject {
             print("Successfully added folder")
         } catch {
             print("Failed to save new folder: \(error)")
+        }
+    }
+    
+    func deleteFolders(at offsets: IndexSet) {
+        offsets.forEach { index in
+            let folder = rootDirectory.folders[index]
+            modelContext.delete(folder)
+        }
+        
+        do {
+            try modelContext.save()
+            print("Succesfully deleted folder")
+        } catch {
+            print("Could Not delete folder: \(error)")
         }
     }
     
