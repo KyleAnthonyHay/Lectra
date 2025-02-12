@@ -31,18 +31,7 @@ struct MainTabView: View {
     }
     
     var body: some View {
-        TabView {
-            FolderView(rootDirectory: rootDirectory)
-                .tabItem {
-                    Label("Folder", systemImage: "folder")
-                }
-            RecordView()
-                .tabItem {
-                    Label("Record", systemImage: "mic.circle")
-                }
-
-
-        }
+        FolderView(rootDirectory: rootDirectory)
     }
 }
 

@@ -7,6 +7,10 @@ struct FolderView: View {
     //Basic UI Implementation
     @State private var isShowingNewFolderDialog = false
     @State private var newFolderName = ""
+    // Record View
+    @State private var isShowingNewRecordingDialog = false
+    @State private var navigateToRecordView = false
+    @State private var newRecordingName = ""
     
     // MARK: Swift Data Implementation
     @Environment(\.modelContext) private var modelContext
@@ -18,18 +22,11 @@ struct FolderView: View {
     
     // MARK: UI
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Text("Folders")
                     .font(.largeTitle)
                     .padding()
-
-//                List(rootDirectory.folders, id: \.id) { folder in
-//                    NavigationLink(destination: FileListView(folder: folder.name)) {
-//                        Text(folder.name)
-//                    }
-//                }
-//                .listStyle(PlainListStyle())
                 List {
                     ForEach(rootDirectory.folders, id: \.id) { folder in
                         NavigationLink(destination: FileListView(folder: folder.name)){
@@ -40,30 +37,58 @@ struct FolderView: View {
                         folderManager.deleteFolders(at: offsets)
                     }
                 }
-
-                Button(action: {
-                    isShowingNewFolderDialog = true
-                }) {
-                    HStack {
-                        Image(systemName: "folder.badge.plus")
-                        Text("New Folder")
+                
+                
+                HStack {
+                    // MARK: NEW FOLDER
+                    Button(action: {
+                            isShowingNewFolderDialog = true
+                        }) {
+                            HStack {
+                                Image(systemName: "folder.badge.plus")
+                                Text("New Folder")
+                            }
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                        }
+                        .padding()
+                    
+                    
+                    // MARK: NEW RECORDING
+                    Button(action: {
+                        isShowingNewRecordingDialog = true
+                        print("New View Button Pressed")
+                    }) {
+                        HStack {
+                            Image(systemName: "plus")
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }.navigationDestination(isPresented: $navigateToRecordView) {
+                        RecordView(tupleName: newRecordingName)
                     }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
                 }
-                .padding()
+ 
+                
             }
         }
         .sheet(isPresented: $isShowingNewFolderDialog) {
             NewFolderDialog(folderName: $newFolderName)
                 .onDisappear {
                     if !newFolderName.isEmpty {
-//                        folders.append(newFolderName)
                         folderManager.addNewFolder(named: newFolderName)
                         newFolderName = ""
                     }
+                }
+        }
+        .sheet(isPresented: $isShowingNewRecordingDialog) {
+            NewRecordingDialog(newRecordingName: $newRecordingName)
+                .onDisappear {
+                    navigateToRecordView = true
                 }
         }
     }

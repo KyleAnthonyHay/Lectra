@@ -8,7 +8,9 @@ class AudioRecorderManager: NSObject, ObservableObject {
 
     @Published var isRecording = false
     @Published var isPlaying = false
-
+    /// TODO:
+    ///     - change audio and transcription save locationn to be stored in a transcriptuion tuple, with its respective card
+    ///     - promot user to name tuple before recording
     override init() {
         // Set the path to Documents/Transcriptions
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]

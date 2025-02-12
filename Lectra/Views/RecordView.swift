@@ -11,11 +11,12 @@ struct RecordView: View {
     private let audioManager = AudioRecorderManager()
     private let openAIClient = OpenAIClientWrapper()
     @State private var gptResponse: String? = nil // Shared state for notes
-
+    var tupleName: String = ""
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 30) {
-                Text("Record")
+                Text(tupleName)
                     .font(.largeTitle)
                     .padding()
                 LectureRecordCard(audioManager: audioManager)
@@ -28,6 +29,6 @@ struct RecordView: View {
 }
 
 #Preview {
-    RecordView()
+    RecordView(tupleName: "How to Pray")
 }
 
