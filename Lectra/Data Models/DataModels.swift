@@ -50,7 +50,7 @@ class Transcription {
 class TranscriptionTuple {
     @Attribute(.unique) var id: UUID
     @Relationship(deleteRule: .cascade) var audioFile: AudioFile
-    @Relationship(deleteRule: .cascade) var transcription: Transcription
+    @Relationship(deleteRule: .cascade) var transcription: Transcription?
     var createdAt: Date
     var name: String
     

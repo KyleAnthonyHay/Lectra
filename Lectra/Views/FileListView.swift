@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct FileListView: View {
+    @Query(FetchDescriptor<TranscriptionTuple>()) private var swiftDataTranscriptionTuples: [TranscriptionTuple]
     let transcriptionTuples: [TranscriptionTuple]
     // UI: Columns
     let columns = [
@@ -22,7 +23,7 @@ struct FileListView: View {
                 .font(.title)
             // MARK: Files
             LazyVGrid(columns: columns) {
-                ForEach(transcriptionTuples, id: \.id) { tuple in
+                ForEach(swiftDataTranscriptionTuples, id: \.id) { tuple in
                     TranscriptionCard(tuple: tuple)
                 }.padding(8)
             }
@@ -34,6 +35,7 @@ struct FileListView: View {
 
 // MARK: - Card View
 struct TranscriptionCard: View {
+    @Environment(\.modelContext) private var modelContext
     let tuple: TranscriptionTuple
     var formattedDate: String {
             let formatter = DateFormatter()
@@ -61,6 +63,17 @@ struct TranscriptionCard: View {
                 .padding(.top,4)
             Text(formattedDate)
                 .font(.caption)
+            // Trash button to delete the tuple from SwiftData
+            Button {
+                // Delete the tuple from SwiftData and save the changes
+                modelContext.delete(tuple)
+                try? modelContext.save()
+                print("Deleted tuple: \(tuple.name)")
+            } label: {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
+            }
+            .padding(.top, 4)
         }
     
         

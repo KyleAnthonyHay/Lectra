@@ -7,6 +7,9 @@
 
 import SwiftUI
 
+/// TODO:
+///     - Have Audio Recorder manager store recording in Tuple Object
+///     - openAiclient store transcription in said
 struct RecordView: View {
     private let audioManager = AudioRecorderManager()
     private let openAIClient = OpenAIClientWrapper()

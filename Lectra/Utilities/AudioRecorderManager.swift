@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import SwiftData
 
 class AudioRecorderManager: NSObject, ObservableObject {
     private var audioRecorder: AVAudioRecorder?
@@ -63,10 +64,25 @@ class AudioRecorderManager: NSObject, ObservableObject {
         }
     }
 
-    func stopRecording() {
+    func stopRecording(modelContext: ModelContext? = nil) {
         audioRecorder?.stop()
         isRecording = false
         print("Recording stopped successfully. File saved at \(audioFileURL.path)")
+        
+        if let context = modelContext {
+            do {
+                let audioData = try getAudioData()
+                
+                let audioFile = AudioFile(name: "SwiftData Recording", audioData: audioData)
+                let transcription = Transcription(associatedAudioFile: audioFile, text: "#Test String")
+                let transcriptionTuple = TranscriptionTuple(name: "SwiftData Recording", audioFile: audioFile, transcription: transcription, createdAt: Date())
+                context.insert(transcriptionTuple)
+                try context.save()
+                print("CoreData: Save Successful :)")
+            } catch {
+                print("Error Saving audio Data to SwiftData: \(error.localizedDescription)")
+            }
+        }
     }
 
     func playAudio() {

@@ -91,7 +91,9 @@ struct FolderView: View {
         .sheet(isPresented: $isShowingNewRecordingDialog) {
             NewRecordingDialog(newRecordingName: $newRecordingName)
                 .onDisappear {
-                    navigateToRecordView = true
+                    if !newRecordingName.isEmpty {
+                        navigateToRecordView = true
+                    }
                 }
         }
     }
