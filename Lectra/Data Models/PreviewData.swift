@@ -7,7 +7,6 @@
 import SwiftUI
 import SwiftData
 
-// A global constant for preview data
 struct PreviewData {
     static var rootDirectory: RootDirectory {
         let rootDirectory = RootDirectory()

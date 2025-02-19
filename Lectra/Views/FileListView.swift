@@ -8,6 +8,10 @@
 import SwiftUI
 import SwiftData
 
+// TODO:
+/// Creating a TranscriptionView
+///     - fetch & preview recorded audio
+
 struct FileListView: View {
     @Query(FetchDescriptor<TranscriptionTuple>()) private var swiftDataTranscriptionTuples: [TranscriptionTuple]
     let transcriptionTuples: [TranscriptionTuple]

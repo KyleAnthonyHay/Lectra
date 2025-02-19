@@ -84,7 +84,7 @@ struct GenerateNotesCard: View {
 
 #Preview {
     GenerateNotesCard(
-        audioManager: AudioRecorderManager(),
+        audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple),
         openAIClient: OpenAIClientWrapper()
     )
 }

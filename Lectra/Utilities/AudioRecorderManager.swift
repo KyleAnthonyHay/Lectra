@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import AVFoundation
 import SwiftData
 
@@ -9,10 +10,8 @@ class AudioRecorderManager: NSObject, ObservableObject {
 
     @Published var isRecording = false
     @Published var isPlaying = false
-    /// TODO:
-    ///     - change audio and transcription save locationn to be stored in a transcriptuion tuple, with its respective card
-    ///     - promot user to name tuple before recording
-    override init() {
+
+    init(transcriptionTuple: TranscriptionTuple) {
         // Set the path to Documents/Transcriptions
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let audioRecordingDirectory = documentsDirectory.appending(path: "AudioRecordings")
@@ -64,7 +63,7 @@ class AudioRecorderManager: NSObject, ObservableObject {
         }
     }
 
-    func stopRecording(modelContext: ModelContext? = nil) {
+    func stopRecording(modelContext: ModelContext? = nil, transcriptionTuple: TranscriptionTuple) {
         audioRecorder?.stop()
         isRecording = false
         print("Recording stopped successfully. File saved at \(audioFileURL.path)")
@@ -72,10 +71,8 @@ class AudioRecorderManager: NSObject, ObservableObject {
         if let context = modelContext {
             do {
                 let audioData = try getAudioData()
-                
-                let audioFile = AudioFile(name: "SwiftData Recording", audioData: audioData)
-                let transcription = Transcription(associatedAudioFile: audioFile, text: "#Test String")
-                let transcriptionTuple = TranscriptionTuple(name: "SwiftData Recording", audioFile: audioFile, transcription: transcription, createdAt: Date())
+                let audioFile = AudioFile(name: transcriptionTuple.name, audioData: audioData)
+                transcriptionTuple.audioFile = audioFile
                 context.insert(transcriptionTuple)
                 try context.save()
                 print("CoreData: Save Successful :)")

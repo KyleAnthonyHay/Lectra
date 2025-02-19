@@ -47,14 +47,14 @@ class Transcription {
 }
 
 @Model
-class TranscriptionTuple {
+class TranscriptionTuple: ObservableObject {
     @Attribute(.unique) var id: UUID
-    @Relationship(deleteRule: .cascade) var audioFile: AudioFile
+    @Relationship(deleteRule: .cascade) var audioFile: AudioFile?
     @Relationship(deleteRule: .cascade) var transcription: Transcription?
     var createdAt: Date
     var name: String
     
-    init(name: String, id: UUID = UUID(), audioFile: AudioFile, transcription: Transcription, createdAt: Date = Date()) {
+    init(name: String, id: UUID = UUID(), audioFile: AudioFile? = nil, transcription: Transcription? = nil, createdAt: Date = Date()) {
         self.name = name
         self.id = id
         self.audioFile = audioFile
