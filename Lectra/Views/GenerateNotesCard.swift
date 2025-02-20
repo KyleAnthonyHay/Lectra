@@ -55,7 +55,7 @@ struct GenerateNotesCard: View {
         .frame(width: 363, height: 188)
         // MARK: Display Notes Card
         if let response = gptResponse {
-            DisplayNotesCard(gptResponse: response)
+            DisplayNotesCard(gptResponse: response,audioManager: audioManager)
         }
     }
 

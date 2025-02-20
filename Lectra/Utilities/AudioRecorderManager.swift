@@ -130,6 +130,22 @@ class AudioRecorderManager: NSObject, ObservableObject {
     func getAudioData() throws -> Data {
         return try Data(contentsOf: audioFileURL)
     }
+    
+    func saveTranscription(modelContext: ModelContext, tuple: TranscriptionTuple, transcription: String) {
+        
+        if tuple.transcription == nil {
+            let newTranscription = Transcription(associatedAudioFile: tuple.audioFile!, text: transcription)
+            tuple.transcription = newTranscription
+        }
+        
+        do {
+            // Save the updated tuple in the model context.
+            try modelContext.save()
+            print("Transcription updated successfully.")
+        } catch {
+            print("Error saving transcription: \(error.localizedDescription)")
+        }
+    }
 }
 
 extension AudioRecorderManager: AVAudioPlayerDelegate {

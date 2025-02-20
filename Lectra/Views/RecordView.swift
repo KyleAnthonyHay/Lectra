@@ -30,10 +30,11 @@ struct RecordView: View {
                     .padding()
                 LectureRecordCard(audioManager: audioManager)
                 GenerateNotesCard(audioManager: audioManager, openAIClient: openAIClient)
-                DisplayNotesCard(gptResponse: gptResponse)
+                DisplayNotesCard(gptResponse: gptResponse, audioManager: audioManager)
             }
             .padding()
         }.environmentObject(transcriptionTuple)
+        
     }
 }
 

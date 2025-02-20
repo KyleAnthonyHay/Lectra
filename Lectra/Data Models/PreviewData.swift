@@ -21,6 +21,31 @@ struct TuplePreviewData {
     let dummyTranscription: Transcription
     let dummyTuple: TranscriptionTuple
     var dummyTupleArray: [TranscriptionTuple] = []
+    var dummyResponse: String = """
+        # Kyle Anthony - Software Developer and Videographer/Photographer
+
+        ## Personal Information
+
+        - Experience:
+          - 5 years of experience in Videography and Photography
+          - 4 years of experience in Software Development
+          
+        ## Professional Experiences
+
+        1. ### Videography and Photography
+
+            - 5 years of Professional Experience
+            - Owns a Production Company
+
+        2. ### Software Development
+
+            - 4 years of Experience
+            - Currently looking for a Job in Tech
+
+        ## Ownership
+
+        - Owns a Production Company
+        """
 
     init() {
         // Load sample audio data from the app bundle
@@ -35,7 +60,7 @@ struct TuplePreviewData {
         let audio = AudioFile(name: "Dummy Audio", audioData: sampleData)
         self.dummyAudioFile = audio
         
-        let transcription = Transcription(associatedAudioFile: audio, text: "Sample transcription text.")
+        let transcription = Transcription(associatedAudioFile: audio, text: dummyResponse)
         self.dummyTranscription = transcription
         
         self.dummyTuple = TranscriptionTuple(
