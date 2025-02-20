@@ -21,23 +21,29 @@ struct FileListView: View {
         GridItem(.flexible())
     ]
     var body: some View {
-        ScrollView {
-            // MARK: Title
-            Text("Transcriptions")
-                .font(.title)
-            // MARK: Files
-            LazyVGrid(columns: columns) {
-                ForEach(swiftDataTranscriptionTuples, id: \.id) { tuple in
-                    TranscriptionCard(tuple: tuple)
-                }.padding(8)
-            }
-            .padding()
-        }// End of Scrollview
-        .padding(EdgeInsets(top: 8, leading: 8, bottom: 0, trailing: 8))
+        NavigationStack {
+            ScrollView {
+                // MARK: Title
+                Text("Transcriptions")
+                    .font(.title)
+                // MARK: Files
+                LazyVGrid(columns: columns) {
+                    ForEach(swiftDataTranscriptionTuples, id: \.id) { tuple in
+                        NavigationLink {
+                            TupleView(transcriptionTuple: tuple)
+                        } label: {
+                            TranscriptionCard(tuple: tuple)
+                        }
+                    }.padding(8)
+                }
+                .padding()
+            }// End of Scrollview
+            .padding(EdgeInsets(top: 8, leading: 8, bottom: 0, trailing: 8))
+        }
     }
 }
 
-// MARK: - Card View
+// MARK: - Transcription Card
 struct TranscriptionCard: View {
     @Environment(\.modelContext) private var modelContext
     let tuple: TranscriptionTuple

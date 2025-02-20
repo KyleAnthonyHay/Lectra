@@ -98,6 +98,28 @@ class AudioRecorderManager: NSObject, ObservableObject {
             print("Failed to play audio: \(error.localizedDescription)")
         }
     }
+    
+    func playSwiftDataAudio(tuple: TranscriptionTuple) {
+        guard !isRecording else {
+            print("Cannot play while recording")
+            return
+        }
+        // Safely unwrap the optional audioData
+        guard let audioData = tuple.audioFile?.audioData else {
+            print("No audio data available")
+            return
+        }
+        
+        do {
+            audioPlayer = try AVAudioPlayer(data: audioData)
+            audioPlayer?.delegate = self
+            audioPlayer?.play()
+            isPlaying = true
+            print("Audio playback started from SwiftData audio")
+        } catch {
+            print("Failed to play swift data audio: \(error.localizedDescription)")
+        }
+    }
 
     func stopAudio() {
         audioPlayer?.stop()

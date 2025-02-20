@@ -23,7 +23,16 @@ struct TuplePreviewData {
     var dummyTupleArray: [TranscriptionTuple] = []
 
     init() {
-        let audio = AudioFile(name: "Dummy Audio", audioData: Data())
+        // Load sample audio data from the app bundle
+        var sampleData = Data()
+        if let sampleAudioURL = Bundle.main.url(forResource: "LectraDemo", withExtension: "mp3"),
+           let data = try? Data(contentsOf: sampleAudioURL) {
+            sampleData = data
+        } else {
+            print("Failed to load sample audio data")
+        }
+        
+        let audio = AudioFile(name: "Dummy Audio", audioData: sampleData)
         self.dummyAudioFile = audio
         
         let transcription = Transcription(associatedAudioFile: audio, text: "Sample transcription text.")
