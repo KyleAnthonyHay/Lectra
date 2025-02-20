@@ -1,5 +1,7 @@
 import Foundation
+import SwiftUI
 import AVFoundation
+import SwiftData
 
 class AudioRecorderManager: NSObject, ObservableObject {
     private var audioRecorder: AVAudioRecorder?
@@ -8,10 +10,8 @@ class AudioRecorderManager: NSObject, ObservableObject {
 
     @Published var isRecording = false
     @Published var isPlaying = false
-    /// TODO:
-    ///     - change audio and transcription save locationn to be stored in a transcriptuion tuple, with its respective card
-    ///     - promot user to name tuple before recording
-    override init() {
+
+    init(transcriptionTuple: TranscriptionTuple) {
         // Set the path to Documents/Transcriptions
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let audioRecordingDirectory = documentsDirectory.appending(path: "AudioRecordings")
@@ -63,10 +63,23 @@ class AudioRecorderManager: NSObject, ObservableObject {
         }
     }
 
-    func stopRecording() {
+    func stopRecording(modelContext: ModelContext? = nil, transcriptionTuple: TranscriptionTuple) {
         audioRecorder?.stop()
         isRecording = false
         print("Recording stopped successfully. File saved at \(audioFileURL.path)")
+        
+        if let context = modelContext {
+            do {
+                let audioData = try getAudioData()
+                let audioFile = AudioFile(name: transcriptionTuple.name, audioData: audioData)
+                transcriptionTuple.audioFile = audioFile
+                context.insert(transcriptionTuple)
+                try context.save()
+                print("CoreData: Save Successful :)")
+            } catch {
+                print("Error Saving audio Data to SwiftData: \(error.localizedDescription)")
+            }
+        }
     }
 
     func playAudio() {
@@ -83,6 +96,28 @@ class AudioRecorderManager: NSObject, ObservableObject {
             print("Audio playback started")
         } catch {
             print("Failed to play audio: \(error.localizedDescription)")
+        }
+    }
+    
+    func playSwiftDataAudio(tuple: TranscriptionTuple) {
+        guard !isRecording else {
+            print("Cannot play while recording")
+            return
+        }
+        // Safely unwrap the optional audioData
+        guard let audioData = tuple.audioFile?.audioData else {
+            print("No audio data available")
+            return
+        }
+        
+        do {
+            audioPlayer = try AVAudioPlayer(data: audioData)
+            audioPlayer?.delegate = self
+            audioPlayer?.play()
+            isPlaying = true
+            print("Audio playback started from SwiftData audio")
+        } catch {
+            print("Failed to play swift data audio: \(error.localizedDescription)")
         }
     }
 

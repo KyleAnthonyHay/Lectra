@@ -7,15 +7,19 @@
 
 import SwiftUI
 import AVFoundation
+import SwiftData
 
 struct LectureRecordCard: View {
     @ObservedObject var audioManager: AudioRecorderManager
+    @EnvironmentObject var transcriptionTuple: TranscriptionTuple
+    @Environment(\.modelContext) private var modelContext
 
+    
     var body: some View {
         HStack(spacing: 25) {
             // MARK: Record/Stop Button
             Button(action: {
-                audioManager.isRecording ? audioManager.stopRecording() : audioManager.startRecording()
+                audioManager.isRecording ? audioManager.stopRecording(modelContext: modelContext, transcriptionTuple: transcriptionTuple) : audioManager.startRecording()
             }) {
                 Image(systemName: audioManager.isRecording ? "stop.circle.fill" : "record.circle.fill")
                     .resizable()
@@ -45,6 +49,6 @@ struct LectureRecordCard: View {
 
 
 #Preview {
-    LectureRecordCard(audioManager: AudioRecorderManager())
+    LectureRecordCard(audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple))
 }
 

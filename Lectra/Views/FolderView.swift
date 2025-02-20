@@ -20,6 +20,9 @@ struct FolderView: View {
         FolderManager(modelContext: modelContext, rootDirectory: rootDirectory)
     }
     
+    // PREVIEW DATA
+    let tuplePreviewData = TuplePreviewData()
+    
     // MARK: UI
     var body: some View {
         NavigationStack {
@@ -29,7 +32,7 @@ struct FolderView: View {
                     .padding()
                 List {
                     ForEach(rootDirectory.folders, id: \.id) { folder in
-                        NavigationLink(destination: FileListView(folder: folder.name)){
+                        NavigationLink(destination: FileListView(transcriptionTuples: tuplePreviewData.dummyTupleArray)){
                             Text(folder.name)
                         }
                     }
@@ -88,20 +91,14 @@ struct FolderView: View {
         .sheet(isPresented: $isShowingNewRecordingDialog) {
             NewRecordingDialog(newRecordingName: $newRecordingName)
                 .onDisappear {
-                    navigateToRecordView = true
+                    if !newRecordingName.isEmpty {
+                        navigateToRecordView = true
+                    }
                 }
         }
     }
 }
 
-struct FileListView: View {
-    let folder: String
-
-    var body: some View {
-        Text("Displaying files for folder: \(folder)")
-            .navigationTitle(folder)
-    }
-}
 
 
 #Preview {
