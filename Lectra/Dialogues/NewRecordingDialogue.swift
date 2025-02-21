@@ -8,19 +8,31 @@
 // NewFolderDialog.swift
 
 import SwiftUI
-
+import SwiftData
+// TODO: Apply New Tuple to selected folder ? default flder
+/// - custom folder query per row
 struct NewRecordingDialog: View {
     @Binding var newRecordingName: String
+    @Binding var selectedFolder: Folder?  // The folder the user selects
     @Environment(\.dismiss) private var dismiss
+    @Query(FetchDescriptor<Folder>()) private var folders: [Folder]
+    var previewFolders = TuplePreviewData().dummyFolderArray
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("New Recording")
-                .font(.headline)
+            Text("New Recording").font(.headline)
 
             TextField("Recording Name", text: $newRecordingName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+            
+            Menu("Select Folder") {
+                #warning("change previewFolders back to folders")
+                ForEach(previewFolders, id: \.id) { folder in
+                    Button(folder.name) {
+                        selectedFolder = folder
+                    }
+                }
+            }
 
             HStack {
                 Button(action: {
@@ -51,6 +63,6 @@ struct NewRecordingDialog: View {
 }
 
 #Preview {
-    NewRecordingDialog(newRecordingName: .constant(""))
+    NewRecordingDialog(newRecordingName: .constant(""), selectedFolder: .constant(TuplePreviewData().dummyFolder))
 }
 

@@ -3,6 +3,10 @@
 import SwiftUI
 import SwiftData
 
+/// TODO:
+///  - add the ability to assign  new recording to group
+///  - add refind where to create new folder swiftdata object and make changes accordingly
+
 struct FolderView: View {
     //Basic UI Implementation
     @State private var isShowingNewFolderDialog = false
@@ -22,6 +26,7 @@ struct FolderView: View {
     
     // PREVIEW DATA
     let tuplePreviewData = TuplePreviewData()
+    @State private var selectedFolder: Folder? = nil
     
     // MARK: UI
     var body: some View {
@@ -89,7 +94,7 @@ struct FolderView: View {
                 }
         }
         .sheet(isPresented: $isShowingNewRecordingDialog) {
-            NewRecordingDialog(newRecordingName: $newRecordingName)
+            NewRecordingDialog(newRecordingName: $newRecordingName, selectedFolder: $selectedFolder)
                 .onDisappear {
                     if !newRecordingName.isEmpty {
                         navigateToRecordView = true

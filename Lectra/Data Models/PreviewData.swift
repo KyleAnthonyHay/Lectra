@@ -21,6 +21,8 @@ struct TuplePreviewData {
     let dummyTranscription: Transcription
     let dummyTuple: TranscriptionTuple
     var dummyTupleArray: [TranscriptionTuple] = []
+    var dummyFolder: Folder
+    var dummyFolderArray: [Folder] = []
     var dummyResponse: String = """
         # Kyle Anthony - Software Developer and Videographer/Photographer
 
@@ -70,9 +72,18 @@ struct TuplePreviewData {
             createdAt: Date(timeIntervalSince1970: 0)
         )
         
-        // Create 15 distinct instances for the array
        self.dummyTupleArray = (0..<15).map { _ in
            TranscriptionTuple(name: "Sample Recording", audioFile: audio, transcription: transcription)
        }
+        
+        // MARK: Folders
+        let folder = Folder(name: "Sample Folder")
+        self.dummyFolder = folder
+        
+        let folders = (0..<4).map { i in
+            Folder(name: "Sample Folder \(i)")
+        }
+        self.dummyFolderArray = folders
+        
     }
 }
