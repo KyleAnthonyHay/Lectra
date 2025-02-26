@@ -9,9 +9,18 @@ import SwiftData
 
 struct PreviewData {
     static var rootDirectory: RootDirectory {
+        // Root Directory
         let rootDirectory = RootDirectory()
-        rootDirectory.folders.append(Folder(name: "Work"))
+        
+        // Folders
+        let dummyTupleArray = TuplePreviewData.init().dummyTupleArray
+        let workFolder = Folder(name: "Work")
+        workFolder.transcriptionTuples = dummyTupleArray
+        
+        rootDirectory.folders.append(workFolder)
         rootDirectory.folders.append(Folder(name: "Personal"))
+        
+        
         return rootDirectory
     }
 }
@@ -78,7 +87,9 @@ struct TuplePreviewData {
         
         // MARK: Folders
         let folder = Folder(name: "Sample Folder")
+        folder.transcriptionTuples.append(contentsOf: dummyTupleArray)
         self.dummyFolder = folder
+        
         
         let folders = (0..<4).map { i in
             Folder(name: "Sample Folder \(i)")

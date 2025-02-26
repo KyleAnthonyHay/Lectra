@@ -68,4 +68,19 @@ class FolderManager: ObservableObject {
         }
     }
     
+    // moves a tuple from one folder to the other
+    func moveTuple(_ tuple: TranscriptionTuple, from sourceFolder: Folder, to targetFolder: Folder) {
+        sourceFolder.transcriptionTuples.removeAll { $0.id == tuple.id}
+        
+        targetFolder.transcriptionTuples.append(tuple)
+        
+        do {
+            try modelContext.save()
+            // Force refresh any UI that might be observing these folders
+            objectWillChange.send()
+            print("Successfully moved \(tuple.name) from \(sourceFolder.name) to \(targetFolder.name)")
+        } catch {
+            print("Failed to move tuple: \(error)")
+        }
+    }
 }

@@ -35,7 +35,7 @@ struct FileListView: View {
                             NavigationLink {
                                 TupleView(transcriptionTuple: tuple)
                             } label: {
-                                TranscriptionCard(tuple: tuple)
+                                TranscriptionCard(tuple: tuple, folder: folder)
                             }
                         }.padding(8)
                     }
@@ -51,8 +51,19 @@ struct FileListView: View {
 struct TranscriptionCard: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var folderManager: FolderManager
+    @Query private var folders: [Folder]
+    
+    init(tuple: TranscriptionTuple, folder: Folder) {
+        self.tuple = tuple
+        self.folder = folder
+        // Create a fetch descriptor to ensure we get all folders
+        let descriptor = FetchDescriptor<Folder>(sortBy: [SortDescriptor(\.name)])
+        _folders = Query(descriptor)
+    }
     
     let tuple: TranscriptionTuple
+    let folder: Folder
+    
     var formattedDate: String {
             let formatter = DateFormatter()
             formatter.dateFormat = "MMM. dd, yyyy"
@@ -79,18 +90,36 @@ struct TranscriptionCard: View {
                 .padding(.top,4)
             Text(formattedDate)
                 .font(.caption)
-            // Trash button to delete the tuple from SwiftData
-            Button {
-                // Delete the tuple from SwiftData and save the changes
-//                folderManager.remove(tuple: tuple, fromFolder: folder)
-                modelContext.delete(tuple)
-                try? modelContext.save()
-                print("Deleted tuple: \(tuple.name)")
-            } label: {
-                Image(systemName: "trash")
-                    .foregroundColor(.red)
+            // HStack with folder and trash buttons
+            HStack (spacing: 36) {
+                Menu {
+                    ForEach(folders, id: \.id) { targetFolder in
+                        if targetFolder.id != folder.id {
+                            Button(targetFolder.name) {
+                                print("Moving tuple to folder: \(targetFolder.name)")
+                                folderManager.moveTuple(tuple, from: folder, to: targetFolder)
+                            }
+                        }
+                    }
+                } label: {
+                    Image(systemName: "arrow.turn.up.left")
+                        .foregroundColor(.blue)
+                }
+                
+                
+                
+                Button {
+                    // Delete the tuple from SwiftData and save the changes
+    //                folderManager.remove(tuple: tuple, fromFolder: folder)
+                    modelContext.delete(tuple)
+                    try? modelContext.save()
+                    print("Deleted tuple: \(tuple.name)")
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                }
+                .padding(.top, 4)
             }
-            .padding(.top, 4)
         }
     
         
