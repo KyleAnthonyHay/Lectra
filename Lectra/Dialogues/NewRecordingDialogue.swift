@@ -14,9 +14,11 @@ import SwiftData
 struct NewRecordingDialog: View {
     @Binding var newRecordingName: String
     @Binding var selectedFolder: Folder?
+    @State private var selectedFolderName: String = "Select Folder"
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var folderManager: FolderManager
     
     @Query(FetchDescriptor<Folder>()) private var folders: [Folder]
     var previewFolders = TuplePreviewData().dummyFolderArray
@@ -31,12 +33,13 @@ struct NewRecordingDialog: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             
             // Folder Selection
-            Menu("Select Folder") {
-                #warning("change previed Folders back to folders")
+            Menu(selectedFolderName) {
+                #warning("change previewFolders back to folders")
                 ForEach(folders, id: \.id) { folder in
                     Button(folder.name) {
                         selectedFolder = folder
-                        print("Selected folder: \(selectedFolder!.name)")
+                        selectedFolderName = selectedFolder!.name
+                        print("Selected folder: \(folder.name)")
                     }
                 }
             }
@@ -53,15 +56,24 @@ struct NewRecordingDialog: View {
                 Spacer()
 
                 Button(action: {
-                    // 1. Create a new manager each time
-                    // 2. Use it to add a new recording
-//                    let tempManager = FolderManager(modelContext: modelContext, rootDirectory: rootDirectory)
-                    dismiss() // Close dialog and save
+                    // If no folder is selected, use the first folder as default
+                    if selectedFolder == nil && !folders.isEmpty {
+                        selectedFolder = folders[0]
+                        print("Using default folder")
+                    }
+                    
+                    // If there are no folders to select from, create a default
+                    if selectedFolder == nil {
+                        folderManager.addNewFolder(named: "Default Folder")
+                        print("Created and selected Default Folder")
+                    }
+                    
+                    dismiss()
                 }) {
                     Text("Create")
-                        .foregroundColor(.blue)
+                        .foregroundColor(newRecordingName.isEmpty ? .gray : .blue)
                         .fontWeight(.bold)
-                }
+                }.disabled(newRecordingName.isEmpty) // Disable button if no name is provided
             }
             .padding(.horizontal)
         }
@@ -70,6 +82,13 @@ struct NewRecordingDialog: View {
         .background(Color(UIColor.systemBackground))
         .cornerRadius(16)
         .shadow(radius: 8)
+        .onAppear {
+            // set default folder when dialogue appears
+            if selectedFolder == nil && !folders.isEmpty {
+                selectedFolder = folders[0]
+                selectedFolderName = folders[0].name
+            }
+        }
     }
 }
 

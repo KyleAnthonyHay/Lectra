@@ -21,24 +21,28 @@ struct FileListView: View {
         GridItem(.flexible())
     ]
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                // MARK: Title
-                Text("Transcriptions")
-                    .font(.title)
-                // MARK: Files
-                LazyVGrid(columns: columns) {
-                    ForEach(folder.transcriptionTuples, id: \.id) { tuple in
-                        NavigationLink {
-                            TupleView(transcriptionTuple: tuple)
-                        } label: {
-                            TranscriptionCard(tuple: tuple)
-                        }
-                    }.padding(8)
-                }
-                .padding()
-            }// End of Scrollview
-            .padding(EdgeInsets(top: 8, leading: 8, bottom: 0, trailing: 8))
+        if folder.transcriptionTuples.isEmpty {
+            EmptyFolderView(folder: folder)
+        } else {
+            NavigationStack {
+                ScrollView {
+                    // MARK: Title
+                    Text("Transcriptions")
+                        .font(.title)
+                    // MARK: Files
+                    LazyVGrid(columns: columns) {
+                        ForEach(folder.transcriptionTuples, id: \.id) { tuple in
+                            NavigationLink {
+                                TupleView(transcriptionTuple: tuple)
+                            } label: {
+                                TranscriptionCard(tuple: tuple)
+                            }
+                        }.padding(8)
+                    }
+                    .padding()
+                }// End of Scrollview
+                .padding(EdgeInsets(top: 8, leading: 8, bottom: 0, trailing: 8))
+            }
         }
     }
 }
