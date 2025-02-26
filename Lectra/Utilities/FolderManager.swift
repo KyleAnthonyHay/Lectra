@@ -87,6 +87,7 @@ class FolderManager: ObservableObject {
     func renameTuple(tuple: TranscriptionTuple, newName: String) {
         
         tuple.name = newName
+        tuple.audioFile!.name = newName
         
         do {
             try modelContext.save()
