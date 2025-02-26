@@ -8,25 +8,28 @@ import SwiftData
 ///  - add refind where to create new folder swiftdata object and make changes accordingly
 
 struct FolderView: View {
+    // MARK: Swift Data Implementation
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var folderManager: FolderManager
+    let rootDirectory: RootDirectory
+    
     //Basic UI Implementation
     @State private var isShowingNewFolderDialog = false
     @State private var newFolderName = ""
+    
     // Record View
     @State private var isShowingNewRecordingDialog = false
     @State private var navigateToRecordView = false
     @State private var newRecordingName = ""
+    @State private var selectedFolder: Folder? = nil
     
-    // MARK: Swift Data Implementation
-    @Environment(\.modelContext) private var modelContext
-    let rootDirectory: RootDirectory
+
     
-    private var folderManager: FolderManager {
-        FolderManager(modelContext: modelContext, rootDirectory: rootDirectory)
-    }
+    
     
     // PREVIEW DATA
     let tuplePreviewData = TuplePreviewData()
-    @State private var selectedFolder: Folder? = nil
+    
     
     // MARK: UI
     var body: some View {
@@ -37,7 +40,7 @@ struct FolderView: View {
                     .padding()
                 List {
                     ForEach(rootDirectory.folders, id: \.id) { folder in
-                        NavigationLink(destination: FileListView(transcriptionTuples: tuplePreviewData.dummyTupleArray)){
+                        NavigationLink(destination: FileListView(folder: folder)){
                             Text(folder.name)
                         }
                     }
@@ -77,12 +80,12 @@ struct FolderView: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                     }.navigationDestination(isPresented: $navigateToRecordView) {
-                        RecordView(tupleName: newRecordingName)
+                        RecordView(tupleName: newRecordingName, folder: selectedFolder)
                     }
                 }
  
                 
-            }
+            }// end of Vstack
         }
         .sheet(isPresented: $isShowingNewFolderDialog) {
             NewFolderDialog(folderName: $newFolderName)
@@ -94,7 +97,7 @@ struct FolderView: View {
                 }
         }
         .sheet(isPresented: $isShowingNewRecordingDialog) {
-            NewRecordingDialog(newRecordingName: $newRecordingName, selectedFolder: $selectedFolder)
+            NewRecordingDialog(newRecordingName: $newRecordingName, selectedFolder: $selectedFolder, rootDirectory: rootDirectory)
                 .onDisappear {
                     if !newRecordingName.isEmpty {
                         navigateToRecordView = true

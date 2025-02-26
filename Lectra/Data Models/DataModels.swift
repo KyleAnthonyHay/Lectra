@@ -64,7 +64,7 @@ class TranscriptionTuple: ObservableObject {
 }
 
 @Model
-class Folder {
+class Folder: ObservableObject {
     @Attribute(.unique) var id: UUID
     var name: String
     @Relationship(deleteRule: .cascade) var transcriptionTuples: [TranscriptionTuple]

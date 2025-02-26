@@ -13,8 +13,8 @@ import SwiftData
 ///     - fetch & preview recorded audio
 
 struct FileListView: View {
-    @Query(FetchDescriptor<TranscriptionTuple>()) private var swiftDataTranscriptionTuples: [TranscriptionTuple]
-    let transcriptionTuples: [TranscriptionTuple]
+    let folder: Folder
+    
     // UI: Columns
     let columns = [
         GridItem(.flexible()),
@@ -28,7 +28,7 @@ struct FileListView: View {
                     .font(.title)
                 // MARK: Files
                 LazyVGrid(columns: columns) {
-                    ForEach(swiftDataTranscriptionTuples, id: \.id) { tuple in
+                    ForEach(folder.transcriptionTuples, id: \.id) { tuple in
                         NavigationLink {
                             TupleView(transcriptionTuple: tuple)
                         } label: {
@@ -46,6 +46,8 @@ struct FileListView: View {
 // MARK: - Transcription Card
 struct TranscriptionCard: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var folderManager: FolderManager
+    
     let tuple: TranscriptionTuple
     var formattedDate: String {
             let formatter = DateFormatter()
@@ -76,6 +78,7 @@ struct TranscriptionCard: View {
             // Trash button to delete the tuple from SwiftData
             Button {
                 // Delete the tuple from SwiftData and save the changes
+//                folderManager.remove(tuple: tuple, fromFolder: folder)
                 modelContext.delete(tuple)
                 try? modelContext.save()
                 print("Deleted tuple: \(tuple.name)")
@@ -92,5 +95,5 @@ struct TranscriptionCard: View {
 
 #Preview {
     let previewData = TuplePreviewData()
-    FileListView(transcriptionTuples: previewData.dummyTupleArray)
+    FileListView(folder: previewData.dummyFolder).environmentObject(FolderManager(modelContext: ModelContext(try! ModelContainer(for: Folder.self)), rootDirectory: RootDirectory()))
 }

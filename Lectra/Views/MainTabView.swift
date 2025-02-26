@@ -11,8 +11,13 @@ import SwiftData
 struct MainTabView: View {
     @Query(FetchDescriptor<RootDirectory>()) private var rootDirectories: [RootDirectory]
     @Environment(\.modelContext) private var modelContext
+
+    // T3: Create a StateObject for the FolderManager with a temporary empty initialization
+    @StateObject private var folderManager = FolderManager(
+        modelContext: ModelContext(try! ModelContainer(for: RootDirectory.self)),
+        rootDirectory: RootDirectory()
+    )
     
-    //second attempt at checking fetching and establishing the root directory
     private var rootDirectory: RootDirectory {
         if let existingRootDirectory = rootDirectories.first {
             return existingRootDirectory
@@ -31,7 +36,9 @@ struct MainTabView: View {
     }
     
     var body: some View {
-        FolderView(rootDirectory: rootDirectory)
+        // T3: Update the folderManager with the correct context and root directory
+        let _ = folderManager.updateContext(modelContext: modelContext, rootDirectory: rootDirectory)
+        FolderView(rootDirectory: rootDirectory).environmentObject(folderManager)
     }
 }
 

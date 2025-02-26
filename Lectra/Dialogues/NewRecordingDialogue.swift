@@ -13,27 +13,35 @@ import SwiftData
 /// - custom folder query per row
 struct NewRecordingDialog: View {
     @Binding var newRecordingName: String
-    @Binding var selectedFolder: Folder?  // The folder the user selects
+    @Binding var selectedFolder: Folder?
+    
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    
     @Query(FetchDescriptor<Folder>()) private var folders: [Folder]
     var previewFolders = TuplePreviewData().dummyFolderArray
+    var rootDirectory: RootDirectory
 
     var body: some View {
         VStack(spacing: 20) {
+            // Card Title
             Text("New Recording").font(.headline)
-
+            // Text Field
             TextField("Recording Name", text: $newRecordingName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             
+            // Folder Selection
             Menu("Select Folder") {
-                #warning("change previewFolders back to folders")
-                ForEach(previewFolders, id: \.id) { folder in
+                #warning("change previed Folders back to folders")
+                ForEach(folders, id: \.id) { folder in
                     Button(folder.name) {
                         selectedFolder = folder
+                        print("Selected folder: \(selectedFolder!.name)")
                     }
                 }
             }
 
+            // Cancel and Save buttons
             HStack {
                 Button(action: {
                     dismiss() // Close dialog without action
@@ -45,6 +53,9 @@ struct NewRecordingDialog: View {
                 Spacer()
 
                 Button(action: {
+                    // 1. Create a new manager each time
+                    // 2. Use it to add a new recording
+//                    let tempManager = FolderManager(modelContext: modelContext, rootDirectory: rootDirectory)
                     dismiss() // Close dialog and save
                 }) {
                     Text("Create")
@@ -63,6 +74,8 @@ struct NewRecordingDialog: View {
 }
 
 #Preview {
-    NewRecordingDialog(newRecordingName: .constant(""), selectedFolder: .constant(TuplePreviewData().dummyFolder))
+    let tuplePreviewData = TuplePreviewData()
+    
+    NewRecordingDialog(newRecordingName: .constant(""), selectedFolder: .constant(tuplePreviewData.dummyFolder), rootDirectory: PreviewData.rootDirectory)
 }
 
