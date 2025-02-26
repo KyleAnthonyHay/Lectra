@@ -20,6 +20,9 @@ struct NewRecordingDialog: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var folderManager: FolderManager
     
+    // Add a binding to communicate back to parent view
+    @Binding var didConfirmCreation: Bool
+    
     @Query(FetchDescriptor<Folder>()) private var folders: [Folder]
     var previewFolders = TuplePreviewData().dummyFolderArray
     var rootDirectory: RootDirectory
@@ -47,6 +50,7 @@ struct NewRecordingDialog: View {
             // Cancel and Save buttons
             HStack {
                 Button(action: {
+                    didConfirmCreation = false
                     dismiss() // Close dialog without action
                 }) {
                     Text("Cancel")
@@ -68,6 +72,7 @@ struct NewRecordingDialog: View {
                         print("Created and selected Default Folder")
                     }
                     
+                    didConfirmCreation = true
                     dismiss()
                 }) {
                     Text("Create")
@@ -88,6 +93,8 @@ struct NewRecordingDialog: View {
                 selectedFolder = folders[0]
                 selectedFolderName = folders[0].name
             }
+            // Reset the flag when the dialog appears
+            didConfirmCreation = false
         }
     }
 }
@@ -95,6 +102,6 @@ struct NewRecordingDialog: View {
 #Preview {
     let tuplePreviewData = TuplePreviewData()
     
-    NewRecordingDialog(newRecordingName: .constant(""), selectedFolder: .constant(tuplePreviewData.dummyFolder), rootDirectory: PreviewData.rootDirectory)
+    NewRecordingDialog(newRecordingName: .constant(""), selectedFolder: .constant(tuplePreviewData.dummyFolder), didConfirmCreation: .constant(false), rootDirectory: PreviewData.rootDirectory)
 }
 

@@ -23,7 +23,7 @@ struct FolderView: View {
     @State private var newRecordingName = ""
     @State private var selectedFolder: Folder? = nil
     
-
+    @State private var didConfirmRecordingCreation = false
     
     
     
@@ -98,9 +98,9 @@ struct FolderView: View {
                 }
         }
         .sheet(isPresented: $isShowingNewRecordingDialog) {
-            NewRecordingDialog(newRecordingName: $newRecordingName, selectedFolder: $selectedFolder, rootDirectory: rootDirectory)
+            NewRecordingDialog(newRecordingName: $newRecordingName, selectedFolder: $selectedFolder, didConfirmCreation: $didConfirmRecordingCreation, rootDirectory: rootDirectory)
                 .onDisappear {
-                    if !newRecordingName.isEmpty {
+                    if didConfirmRecordingCreation && !newRecordingName.isEmpty {
                         navigateToRecordView = true
                     }
                 }
