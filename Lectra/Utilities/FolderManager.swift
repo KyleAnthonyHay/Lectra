@@ -83,4 +83,17 @@ class FolderManager: ObservableObject {
             print("Failed to move tuple: \(error)")
         }
     }
+    
+    func renameTuple(tuple: TranscriptionTuple, newName: String) {
+        
+        tuple.name = newName
+        
+        do {
+            try modelContext.save()
+            objectWillChange.send()
+            print("Successfully renamed \(tuple.name)")
+        } catch {
+            print("Failed to rename tuple: \(error)")
+        }
+    }
 }

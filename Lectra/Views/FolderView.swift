@@ -69,6 +69,7 @@ struct FolderView: View {
                     
                     // MARK: NEW RECORDING
                     Button(action: {
+                        newRecordingName = ""
                         isShowingNewRecordingDialog = true
                         print("New View Button Pressed")
                     }) {

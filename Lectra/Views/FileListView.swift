@@ -53,6 +53,10 @@ struct TranscriptionCard: View {
     @EnvironmentObject private var folderManager: FolderManager
     @Query private var folders: [Folder]
     
+    // Rename Variables
+    @State private var isRenaming = false
+    @State private var newName = ""
+    
     init(tuple: TranscriptionTuple, folder: Folder) {
         self.tuple = tuple
         self.folder = folder
@@ -90,8 +94,9 @@ struct TranscriptionCard: View {
                 .padding(.top,4)
             Text(formattedDate)
                 .font(.caption)
-            // HStack with folder and trash buttons
-            HStack (spacing: 36) {
+            // HStack with folder, pencil and trash buttons
+            HStack (spacing: 24) {
+                // MARK: Move Folder
                 Menu {
                     ForEach(folders, id: \.id) { targetFolder in
                         if targetFolder.id != folder.id {
@@ -105,9 +110,15 @@ struct TranscriptionCard: View {
                     Image(systemName: "arrow.turn.up.left")
                         .foregroundColor(.blue)
                 }
+                // MARK: Rename Folder
+                Button {
+                    newName = tuple.name
+                    isRenaming = true
+                } label: {
+                    Image(systemName: "pencil")
+                }
                 
-                
-                
+                // MARK: Delete Folder
                 Button {
                     // Delete the tuple from SwiftData and save the changes
     //                folderManager.remove(tuple: tuple, fromFolder: folder)
@@ -119,6 +130,17 @@ struct TranscriptionCard: View {
                         .foregroundColor(.red)
                 }
                 .padding(.top, 4)
+            }
+            .alert("Rename Transcription",isPresented: $isRenaming) {
+                TextField("New name", text: $newName)
+                Button("Cancel", role: .cancel) { }
+                Button("Rename") {
+                    if !newName.isEmpty {
+                        folderManager.renameTuple(tuple: tuple, newName: newName)
+                    }
+                }
+            } message: {
+                Text("Enter a new name for this transcription")
             }
         }
     
