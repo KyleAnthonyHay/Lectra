@@ -3,25 +3,33 @@
 import SwiftUI
 import SwiftData
 
+/// TODO:
+///  - add the ability to assign  new recording to group
+///  - add refind where to create new folder swiftdata object and make changes accordingly
+
 struct FolderView: View {
+    // MARK: Swift Data Implementation
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var folderManager: FolderManager
+    let rootDirectory: RootDirectory
+    
     //Basic UI Implementation
     @State private var isShowingNewFolderDialog = false
     @State private var newFolderName = ""
+    
     // Record View
     @State private var isShowingNewRecordingDialog = false
     @State private var navigateToRecordView = false
     @State private var newRecordingName = ""
+    @State private var selectedFolder: Folder? = nil
     
-    // MARK: Swift Data Implementation
-    @Environment(\.modelContext) private var modelContext
-    let rootDirectory: RootDirectory
+    @State private var didConfirmRecordingCreation = false
     
-    private var folderManager: FolderManager {
-        FolderManager(modelContext: modelContext, rootDirectory: rootDirectory)
-    }
+    
     
     // PREVIEW DATA
     let tuplePreviewData = TuplePreviewData()
+    
     
     // MARK: UI
     var body: some View {
@@ -32,7 +40,7 @@ struct FolderView: View {
                     .padding()
                 List {
                     ForEach(rootDirectory.folders, id: \.id) { folder in
-                        NavigationLink(destination: FileListView(transcriptionTuples: tuplePreviewData.dummyTupleArray)){
+                        NavigationLink(destination: FileListView(folder: folder)){
                             Text(folder.name)
                         }
                     }
@@ -61,6 +69,7 @@ struct FolderView: View {
                     
                     // MARK: NEW RECORDING
                     Button(action: {
+                        newRecordingName = ""
                         isShowingNewRecordingDialog = true
                         print("New View Button Pressed")
                     }) {
@@ -72,12 +81,12 @@ struct FolderView: View {
                         .foregroundColor(.white)
                         .cornerRadius(8)
                     }.navigationDestination(isPresented: $navigateToRecordView) {
-                        RecordView(tupleName: newRecordingName)
+                        RecordView(tupleName: newRecordingName, folder: selectedFolder)
                     }
                 }
  
                 
-            }
+            }// end of Vstack
         }
         .sheet(isPresented: $isShowingNewFolderDialog) {
             NewFolderDialog(folderName: $newFolderName)
@@ -89,9 +98,9 @@ struct FolderView: View {
                 }
         }
         .sheet(isPresented: $isShowingNewRecordingDialog) {
-            NewRecordingDialog(newRecordingName: $newRecordingName)
+            NewRecordingDialog(newRecordingName: $newRecordingName, selectedFolder: $selectedFolder, didConfirmCreation: $didConfirmRecordingCreation, rootDirectory: rootDirectory)
                 .onDisappear {
-                    if !newRecordingName.isEmpty {
+                    if didConfirmRecordingCreation && !newRecordingName.isEmpty {
                         navigateToRecordView = true
                     }
                 }

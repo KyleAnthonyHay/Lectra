@@ -3,7 +3,7 @@ import MarkdownUI
 
 struct DisplayNotesCard: View {
     @State private var defaultResponse: String = """
-        # Kyle Anthony - Software Developer and Videographer/Photographer
+        # PREVIEW DATA
 
         ## Personal Information
 
@@ -28,6 +28,9 @@ struct DisplayNotesCard: View {
         - Owns a Production Company
         """
     var gptResponse: String?
+    @ObservedObject var audioManager: AudioRecorderManager
+    @EnvironmentObject var transcriptionTuple: TranscriptionTuple
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -38,13 +41,6 @@ struct DisplayNotesCard: View {
 
             // Content
             VStack(alignment: .leading, spacing: 10) {
-                // Header Text
-//                Text("Notes")
-//                    .font(.custom("Inter", size: 28).weight(.bold))
-//                    .foregroundColor(.textSet)
-//                    .padding(.leading, 20)
-//                    .padding(.top, 20)
-//                    .padding(.bottom, 10)
 
                 // GPT Response or Default Text
                 Markdown(gptResponse ?? defaultResponse)
@@ -54,10 +50,10 @@ struct DisplayNotesCard: View {
 
                 // Save Button
                 Button(action: {
-                    // Add action here
                     let markdown = gptResponse ?? defaultResponse
                     saveMarkdownAsPDF(markdown: markdown) // Save as PDF
-//                    saveMarkdownAsDocx(markdown: markdown) // Save as DOCX
+                    // Save to swift data
+                    audioManager.saveTranscription(modelContext: modelContext, tuple: transcriptionTuple, transcription: gptResponse ?? defaultResponse)
                     
                     print("Save button tapped")
                 }) {
@@ -84,5 +80,5 @@ struct DisplayNotesCard: View {
 }
 
 #Preview {
-    DisplayNotesCard(gptResponse: nil) // Preview with default text
+    DisplayNotesCard(gptResponse: nil, audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple)) // Preview with default text
 }

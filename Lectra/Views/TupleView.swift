@@ -10,10 +10,16 @@ import SwiftUI
 struct TupleView: View {
     @StateObject var transcriptionTuple: TranscriptionTuple
     @StateObject var audioManager: AudioRecorderManager
+//    var folderManager: FolderManager
+    
+//    @Environment(\.modelContext) private var modelContext
+//    let rootDirectory: RootDirectory
+  
     
     init(transcriptionTuple: TranscriptionTuple) {
         _transcriptionTuple = StateObject(wrappedValue: transcriptionTuple)
         _audioManager = StateObject(wrappedValue: AudioRecorderManager(transcriptionTuple: transcriptionTuple))
+
     }
     
     var body: some View {
@@ -39,13 +45,7 @@ struct TupleView: View {
                     // MARK: Scrollview
                     ScrollView {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Getting Started")
-                            Text("Quick Note")
-                            Text("Personal Home")
-                            Text("Task List")
-                            Text("Journal")
-                            Text("Reading List")
-                            Text("LeetCode Reviews")
+                            TVTranscriptionCard(transcription: transcriptionTuple.transcription?.text)
                         }
                         .padding()
                     }

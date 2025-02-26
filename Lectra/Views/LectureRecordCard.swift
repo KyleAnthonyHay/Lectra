@@ -13,13 +13,21 @@ struct LectureRecordCard: View {
     @ObservedObject var audioManager: AudioRecorderManager
     @EnvironmentObject var transcriptionTuple: TranscriptionTuple
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var folderManager: FolderManager
+    let folder: Folder
 
     
     var body: some View {
         HStack(spacing: 25) {
             // MARK: Record/Stop Button
             Button(action: {
-                audioManager.isRecording ? audioManager.stopRecording(modelContext: modelContext, transcriptionTuple: transcriptionTuple) : audioManager.startRecording()
+                if audioManager.isRecording {
+                    audioManager.stopRecording(modelContext: modelContext, transcriptionTuple: transcriptionTuple)
+                    
+                    folderManager.add(tuple: transcriptionTuple, to: folder)
+                } else {
+                    audioManager.startRecording()
+                }
             }) {
                 Image(systemName: audioManager.isRecording ? "stop.circle.fill" : "record.circle.fill")
                     .resizable()
@@ -49,6 +57,6 @@ struct LectureRecordCard: View {
 
 
 #Preview {
-    LectureRecordCard(audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple))
+    LectureRecordCard(audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple), folder: TuplePreviewData().dummyFolder)
 }
 

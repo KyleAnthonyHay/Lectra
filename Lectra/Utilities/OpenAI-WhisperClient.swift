@@ -49,6 +49,7 @@ class OpenAIClientWrapper {
         Task { @MainActor [unowned self] in
             do {
                 self.state = .processingSpeech
+                // Transcribe Audio
                 let transcription = try await client.generateAudioTransciptions(audioData: audioData)
                 
                 try Task.checkCancellation()
