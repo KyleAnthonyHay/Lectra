@@ -1,5 +1,5 @@
 {
-  "originHash" : "34ed7433f9bb0c5cb3790781c833ae2bd36adadb22bba2bbbce6e59ff54cf026",
+  "originHash" : "d0d4ea787f7983a181702cbdd8f9143dd0b7c494be91cb7e2269d30db0cbe251",
   "pins" : [
     {
       "identity" : "markdownui",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "2849f5323265386e200484b0d0f896e73c3411b9",
         "version" : "6.0.1"
+      }
+    },
+    {
+      "identity" : "openai",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/FuturraGroup/OpenAI.git",
+      "state" : {
+        "revision" : "0f50bc2531639e1093d93d5a02dc2a99e0697ef5",
+        "version" : "1.9.3"
       }
     },
     {

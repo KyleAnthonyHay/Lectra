@@ -12,15 +12,6 @@ class OpenAIClientWrapper {
     private let client: OpenAIClient
 
     init() {
-        // MARK: Debugging: Check if the API key is loaded correctly
-//        if let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] {
-//            print("API Key has been accessed from environment/schema: \(apiKey)")
-//        } else if let apiKey = Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String {
-//            print("API Key has been accesed from Info.plist: \(apiKey)")
-//        } else {
-//            print("API Key not found in either environment or Info.plist.")
-//        }
-
         // MARK: Access API key from Info.plist or environment variables
         guard let rawApiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ??
                            Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String else {
@@ -33,13 +24,7 @@ class OpenAIClientWrapper {
     
     let returnMarkdown: String = "Make well organized notes of audio in markdown format. Inculde a short title for the notes as well as Categories and Subcategories where necessary."
     
-    enum AudioProcessingState {
-        case idle
-        case recordingSpeech
-        case processingSpeech
-        case playingSpeech
-        case error(Error)
-    }
+
     
     private(set) var state: AudioProcessingState = .idle // Default state
     
@@ -72,6 +57,42 @@ class OpenAIClientWrapper {
         processingSpeechTask?.cancel()
         processingSpeechTask = nil
         state = .idle
+    }
+    enum AudioProcessingState {
+        case idle
+        case recordingSpeech
+        case processingSpeech
+        case playingSpeech
+        case error(Error)
+    }
+}
+
+extension OpenAIClientWrapper {
+    func processAudioSegments(audioSegments: [Data]) async throws -> String {
+        var allTranscriptions: [String] = []
+        
+        for (index, segmentData) in audioSegments.enumerated() {
+            do {
+                let task = processSpeechTask(audioData: segmentData)
+                let transcription = try await task.value
+                allTranscriptions.append(transcription)
+                print("Processed segment \(index + 1) of \(audioSegments.count)")
+            } catch {
+                print("Error processing segment \(index + 1): \(error.localizedDescription)")
+                allTranscriptions.append("Error transcribing segment \(index + 1)")
+            }
+        }
+        
+        // Combine all transcriptions
+        let combinedTranscription = allTranscriptions.joined(separator: "\n\n")
+        
+        // Generate the final markdown response
+        let responseText = try await client.promptChatGPT(
+            prompt: combinedTranscription,
+            assistantPrompt: returnMarkdown
+        )
+        
+        return responseText
     }
 }
 

@@ -61,23 +61,28 @@ struct GenerateNotesCard: View {
 
     private func generateNotes() {
         print("Generate Button Pressed")
-        do {
-            let audioData = try audioManager.getAudioData() // Fetch audio data
-            let task = openAIClient.processSpeechTask(audioData: audioData)
-
-            Task {
-                do {
-                    let result = try await task.value
+        Task {
+            do {
+                let audioData = try audioManager.getAudioData() // Fetch audio data
+                
+                // Get the audio segments
+                let audioSegments = try await audioManager.splitAudioIntoTwoMinuteSegments(
+                    from: audioData
+                )
+                
+                // Process all segments and get final response
+                let result = try await openAIClient.processAudioSegments(audioSegments: audioSegments)
+                
+                await MainActor.run {
                     print("Transcription Result: \(result)")
                     gptResponse = result // Update the state to show DisplayNotesCard
-                } catch {
-                    print("Error processing speech: \(error.localizedDescription)")
                 }
+            } catch {
+                print("Error processing speech: \(error.localizedDescription)")
             }
-        } catch {
-            print("Failed to load audio data: \(error.localizedDescription)")
         }
     }
+
 }
 
 

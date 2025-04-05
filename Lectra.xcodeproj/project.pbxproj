@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		850B32762D1531C1003B286F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 850B32752D1531C1003B286F /* README.md */; };
+		85246A182D72B48800661125 /* OpenAIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 85246A172D72B48800661125 /* OpenAIKit */; };
 		858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 858C60FE2D19D8D1002E041D /* XCAOpenAIClient */; };
 		85DF7C0D2D1C5B0C00D64075 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */; };
 /* End PBXBuildFile section */
@@ -46,6 +47,7 @@
 			files = (
 				858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */,
 				85DF7C0D2D1C5B0C00D64075 /* MarkdownUI in Frameworks */,
+				85246A182D72B48800661125 /* OpenAIKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +94,7 @@
 			packageProductDependencies = (
 				858C60FE2D19D8D1002E041D /* XCAOpenAIClient */,
 				85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */,
+				85246A172D72B48800661125 /* OpenAIKit */,
 			);
 			productName = Lectra;
 			productReference = 850B32642D152FD5003B286F /* Lectra.app */;
@@ -124,6 +127,7 @@
 			packageReferences = (
 				858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */,
 				85DF7C0B2D1C5B0C00D64075 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
+				85246A162D72B48800661125 /* XCRemoteSwiftPackageReference "OpenAI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 850B32652D152FD5003B286F /* Products */;
@@ -366,6 +370,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		85246A162D72B48800661125 /* XCRemoteSwiftPackageReference "OpenAI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FuturraGroup/OpenAI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.3;
+			};
+		};
 		858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/alfianlosari/XCAOpenAIClient.git";
@@ -385,6 +397,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		85246A172D72B48800661125 /* OpenAIKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 85246A162D72B48800661125 /* XCRemoteSwiftPackageReference "OpenAI" */;
+			productName = OpenAIKit;
+		};
 		858C60FE2D19D8D1002E041D /* XCAOpenAIClient */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */;

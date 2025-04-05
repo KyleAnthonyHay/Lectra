@@ -86,3 +86,51 @@ class RootDirectory {
         self.folders = folders
     }
 }
+
+// MARK: Extentions
+
+extension AudioFile {
+    /// Splits the audio data into segments of 2 minutes each
+    /// - Returns: Array of Data objects, each containing 2 minutes of audio
+    func splitIntoTwoMinuteSegments() throws -> [Data] {
+        // Audio format constants
+        let bytesPerSample = 2 // 16-bit audio
+        let channelCount = 1 // Stereo
+        let sampleRate = 44100 // Standard audio sample rate
+        let segmentDuration = 120 // 2 minutes in seconds
+        
+        // Calculate bytes per segment
+        let bytesPerSegment = segmentDuration * sampleRate * bytesPerSample * channelCount
+        
+        var segments: [Data] = []
+        let totalBytes = audioData.count
+        
+        // Split the audio data into segments
+        var currentIndex = 0
+        
+        while currentIndex < totalBytes {
+            let remainingBytes = totalBytes - currentIndex
+            let segmentSize = min(bytesPerSegment, remainingBytes)
+            
+            let range = currentIndex..<(currentIndex + segmentSize)
+            let segment = audioData.subdata(in: range)
+            segments.append(segment)
+            
+            currentIndex += segmentSize
+        }
+        
+        return segments
+    }
+    
+    /// Creates new AudioFile objects from the segments
+    /// - Returns: Array of AudioFile objects, each containing 2 minutes of audio
+    func createSegmentedAudioFiles() throws -> [AudioFile] {
+        let segments = try splitIntoTwoMinuteSegments()
+        
+        return segments.enumerated().map { (index, segmentData) in
+            let segmentName = "\(self.name)_segment_\(index + 1)"
+            return AudioFile(name: segmentName, audioData: segmentData)
+        }
+    }
+}
+
