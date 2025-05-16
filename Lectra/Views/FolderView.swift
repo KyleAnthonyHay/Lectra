@@ -54,7 +54,7 @@ struct FolderView: View {
                         
                         // MARK: Jump back in section (Recent folders)
                         VStack(alignment: .leading) {
-                            Text("Recent Notes")
+                            Text("Jump back in")
                                 .font(.headline)
                                 .foregroundColor(.gray)
                                 .padding(.horizontal, 20)
@@ -147,6 +147,7 @@ struct FolderView: View {
         return Array(rootDirectory.folders.prefix(3))
     }
 }
+
 
 
 

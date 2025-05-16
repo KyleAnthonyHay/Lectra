@@ -152,3 +152,4 @@ struct TranscriptionCard: View {
     let previewData = TuplePreviewData()
     FileListView(folder: previewData.dummyFolder).environmentObject(FolderManager(modelContext: ModelContext(try! ModelContainer(for: Folder.self)), rootDirectory: RootDirectory()))
 }
+
