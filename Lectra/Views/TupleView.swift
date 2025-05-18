@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import MarkdownUI
 
 struct TupleView: View {
     @StateObject var transcriptionTuple: TranscriptionTuple
     @StateObject var audioManager: AudioRecorderManager
+    @State private var defaultResponse: String = "# Transcription Variable empty"
 //    var folderManager: FolderManager
     
 //    @Environment(\.modelContext) private var modelContext
@@ -23,34 +25,65 @@ struct TupleView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-                    // MARK: Top View
-                    VStack {
-                        // Title
-                        HStack (spacing: 0){
-                            Image(systemName: "folder.fill")
-                            Text(transcriptionTuple.name)
-                                .font(.headline)
-                                .padding()
-                            
+        NavigationStack {
+            ZStack {
+                Color(.systemBackground).edgesIgnoringSafeArea(.all)
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Header Section
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(transcriptionTuple.name)
+                                    .font(.title2)
+                                    .bold()
+                                Text(formatDate(transcriptionTuple.createdAt))
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
                             Spacer()
+                            Button(action: {}) {
+                                Image(systemName: "ellipsis")
+                                    .foregroundColor(.primary)
+                            }
                         }
-                        // Record Card
-                        TVPlaybackCard(audioManager: audioManager)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.gray.opacity(0.2))
-                    
-                    // MARK: Scrollview
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 8) {
-                            TVTranscriptionCard(transcription: transcriptionTuple.transcription?.text)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 12)
+                        
+                        // Main Content
+                        VStack(alignment: .leading, spacing: 16) {
+                            // Audio Player Section
+                            TupleCard(tuple: transcriptionTuple, audioManager: audioManager)
+                                .padding(.horizontal, 20)
+                            
+                            // Transcription Section
+                            if let transcription = transcriptionTuple.transcription?.text {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Transcription")
+                                        .font(.headline)
+                                        .foregroundColor(.gray)
+                                    
+                                    Markdown(transcription)
+                                        .markdownTheme(.gitHub)
+                                        .textSelection(.enabled)
+                                        .padding(20)
+                                }
+                                .padding(.horizontal, 20)
+                            }
                         }
-                        .padding()
                     }
+                    .padding(.vertical)
                 }
-                .environmentObject(transcriptionTuple)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .environmentObject(transcriptionTuple)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        return formatter.string(from: date)
     }
 }
 

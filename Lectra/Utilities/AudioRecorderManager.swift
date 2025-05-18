@@ -147,80 +147,11 @@ class AudioRecorderManager: NSObject, ObservableObject {
         }
     }
     
-    // MARK: Audio Splitting
-//    func splitAudioIntoTwoMinuteSegments(from audioData: Data) async throws -> [Data] {
-//        guard let originalAudioData = tuple.audioFile?.audioData else {
-//            throw NSError(
-//                domain: "AudioRecorderManager",
-//                code: 1,
-//                userInfo: [NSLocalizedDescriptionKey: "No audio data available"]
-//            )
-//        }
-//        
-//        // Create a temporary file to work with AVAsset
-//        let tempDirectory = FileManager.default.temporaryDirectory
-//        let tempURL = tempDirectory.appendingPathComponent(UUID().uuidString + ".m4a")
-//        try originalAudioData.write(to: tempURL)
-//        
-//        let asset = AVURLAsset(url: tempURL)
-//        let duration = try await asset.load(.duration)
-//        let durationInSeconds = CMTimeGetSeconds(duration)
-//        let segmentDuration: Double = 5 // 2 minutes is 120 seconds
-//        let numberOfSegments = Int(ceil(durationInSeconds / segmentDuration))
-//        var segments: [Data] = []
-//        
-//        for i in 0..<numberOfSegments {
-//            let startTime = Double(i) * segmentDuration
-//            let segmentTime = min(segmentDuration, durationInSeconds - startTime)
-//            
-//            let timeRange = CMTimeRange(
-//                start: CMTime(seconds: startTime, preferredTimescale: 1000),
-//                duration: CMTime(seconds: segmentTime, preferredTimescale: 1000)
-//            )
-//            
-//            let segmentURL = tempDirectory.appendingPathComponent("segment_\(i).m4a")
-//            
-//            // Create export session for this segment
-//            guard let exportSession = AVAssetExportSession(
-//                asset: asset,
-//                presetName: AVAssetExportPresetAppleM4A
-//            ) else {
-//                continue
-//            }
-//            
-////            exportSession.outputURL = segmentURL
-////            exportSession.outputFileType = .m4a
-//            exportSession.timeRange = timeRange
-//            
-//            // Export synchronously within async context
-//            try await exportSession.export(to: segmentURL, as: .m4a)
-//            
-//            do {
-//                // Use the new async/throws export method
-//                try await exportSession.export(to: segmentURL, as: .m4a)
-//                
-//                if let segmentData = try? Data(contentsOf: segmentURL) {
-//                    segments.append(segmentData)
-//                }
-//            } catch {
-//                print("Export error for segment \(i): \(error.localizedDescription)")
-//            }
-//            
-//            if let segmentData = try? Data(contentsOf: segmentURL) {
-//                segments.append(segmentData)
-//            }
-//            
-//            // Clean up segment file
-//            try? FileManager.default.removeItem(at: segmentURL)
-//        }
-//        
-//        // Clean up temporary file
-//        try? FileManager.default.removeItem(at: tempURL)
-//        
-//        return segments
-//    }
+   
 
 }
+
+// MARK: Audio Splitting
 extension AudioRecorderManager {
     func splitAudioIntoTwoMinuteSegments(from audioData: Data) async throws -> [Data] {
         // Create a temporary file to work with AVAsset
