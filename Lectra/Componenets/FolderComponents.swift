@@ -10,6 +10,9 @@ import SwiftUI
 struct FolderRow: View {
     let folder: Folder
     @State private var isExpanded: Bool = false
+    @State private var showingRenameAlert: Bool = false
+    @State private var newFolderName: String = ""
+    @EnvironmentObject private var folderManager: FolderManager
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -27,11 +30,6 @@ struct FolderRow: View {
                     .font(.body)
                 
                 Spacer()
-                
-                Button(action: {}) {
-                    Image(systemName: "plus")
-                        .foregroundColor(.gray)
-                }
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 20)
@@ -39,6 +37,29 @@ struct FolderRow: View {
             .onTapGesture {
                 withAnimation {
                     isExpanded.toggle()
+                }
+            }
+            .contextMenu {
+                Button {
+                    newFolderName = folder.name
+                    showingRenameAlert = true
+                } label: {
+                    Label("Rename", systemImage: "pencil")
+                }
+                
+                Button(role: .destructive) {
+                    if let index = folderManager.rootDirectory.folders.firstIndex(where: { $0.id == folder.id }) {
+                        folderManager.deleteFolders(at: IndexSet(integer: index))
+                    }
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+            .alert("Rename Folder", isPresented: $showingRenameAlert) {
+                TextField("Folder Name", text: $newFolderName)
+                Button("Cancel", role: .cancel) {}
+                Button("Rename") {
+                    folderManager.renameFolder(folder, newName: newFolderName)
                 }
             }
             

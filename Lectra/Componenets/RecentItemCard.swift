@@ -37,7 +37,8 @@ struct RecentItemCard: View {
             Text(item.name)
                 .font(.caption)
                 .padding(8)
-                .lineLimit(2)
+                .lineLimit(1)
+                .truncationMode(.tail)
                 .foregroundColor(.primary)
         }
         .frame(width: 150, height: 150)
