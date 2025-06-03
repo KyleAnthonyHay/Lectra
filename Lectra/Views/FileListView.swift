@@ -61,7 +61,7 @@ struct FileListView: View {
                                     .fontWeight(.bold)
                                 
                                 Text("\(folder.transcriptionTuples.count) transcriptions")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(LectraColors.textSecondary)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal)
@@ -70,11 +70,11 @@ struct FileListView: View {
                             HStack {
                                 HStack {
                                     Image(systemName: "magnifyingglass")
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(LectraColors.textSecondary)
                                     TextField("Search transcriptions", text: $searchText)
                                 }
                                 .padding(8)
-                                .background(Color(.secondarySystemBackground))
+                                .background(LectraColors.secondaryBackground)
                                 .cornerRadius(8)
                                 
                                 Menu {
@@ -86,9 +86,9 @@ struct FileListView: View {
                                     }
                                 } label: {
                                     Image(systemName: "arrow.up.arrow.down")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(LectraColors.brand)
                                         .padding(8)
-                                        .background(Color(.secondarySystemBackground))
+                                        .background(LectraColors.secondaryBackground)
                                         .cornerRadius(8)
                                 }
                             }
@@ -158,13 +158,13 @@ struct TranscriptionCard: View {
             // Preview Image or Icon
             ZStack {
                 Rectangle()
-                    .fill(Color(.secondarySystemBackground))
+                    .fill(LectraColors.secondaryBackground)
                     .aspectRatio(16/9, contentMode: .fit)
                     .cornerRadius(8)
                 
                 Image(systemName: "waveform")
                     .font(.system(size: 30))
-                    .foregroundColor(.blue)
+                    .foregroundColor(LectraColors.brand)
             }
             
             VStack(alignment: .leading, spacing: 8) {
@@ -172,12 +172,12 @@ struct TranscriptionCard: View {
                 Text(tuple.name)
                     .font(.headline)
                     .lineLimit(2)
-                    .foregroundColor(.primary)
+                    .foregroundColor(LectraColors.textPrimary)
                 
                 // Date
                 Text(formattedDate)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(LectraColors.textSecondary)
                 
                 // Playback Controls
                 HStack {
@@ -191,7 +191,7 @@ struct TranscriptionCard: View {
                         Image(systemName: audioManager.isPlaying ? "pause.fill" : "play.fill")
                             .foregroundColor(.white)
                             .frame(width: 28, height: 28)
-                            .background(Color.blue)
+                            .background(LectraColors.brand)
                             .clipShape(Circle())
                     }
                     
@@ -200,11 +200,11 @@ struct TranscriptionCard: View {
                         GeometryReader { geometry in
                             ZStack(alignment: .leading) {
                                 Rectangle()
-                                    .fill(Color.gray.opacity(0.2))
+                                    .fill(LectraColors.brandLight)
                                     .frame(height: 3)
                                 
                                 Rectangle()
-                                    .fill(Color.blue)
+                                    .fill(LectraColors.brand)
                                     .frame(width: geometry.size.width * 0.4, height: 3)
                             }
                         }
@@ -215,7 +215,7 @@ struct TranscriptionCard: View {
             .padding(.horizontal, 8)
             .padding(.bottom, 8)
         }
-        .background(Color(.systemBackground))
+        .background(LectraColors.background)
         .cornerRadius(12)
         .shadow(radius: 2)
         .contextMenu {

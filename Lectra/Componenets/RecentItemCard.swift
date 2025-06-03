@@ -18,7 +18,7 @@ struct RecentItemCard: View {
         VStack(alignment: .leading) {
             ZStack {
                 Rectangle()
-                    .fill(Color.gray)
+                    .fill(LectraColors.brand)
                     .frame(height: 120)
                     .cornerRadius(8, corners: [.topLeft, .topRight])
                 

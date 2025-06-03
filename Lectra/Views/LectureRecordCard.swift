@@ -64,7 +64,7 @@ struct LectureRecordCard: View {
                 }) {
                     ZStack {
                         Circle()
-                            .fill(audioManager.isRecording ? Color.red : Color.blue)
+                            .fill(audioManager.isRecording ? LectraColors.error : LectraColors.brand)
                             .frame(width: 60, height: 60)
                             .shadow(radius: 4)
                         
@@ -85,12 +85,12 @@ struct LectureRecordCard: View {
                     }) {
                         ZStack {
                             Circle()
-                                .fill(Color(.systemBackground))
+                                .fill(LectraColors.background)
                                 .frame(width: 50, height: 50)
                                 .shadow(radius: 4)
                             
                             Image(systemName: audioManager.isPlaying ? "pause.fill" : "play.fill")
-                                .foregroundColor(.blue)
+                                .foregroundColor(LectraColors.brand)
                                 .font(.system(size: 22))
                         }
                     }
@@ -102,18 +102,18 @@ struct LectureRecordCard: View {
                 HStack {
                     Text(formattedCurrentTime)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(LectraColors.textSecondary)
                     
                     // Progress Bar
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
                             Rectangle()
-                                .fill(Color.gray.opacity(0.2))
+                                .fill(LectraColors.brandLight)
                                 .frame(height: 4)
                                 .cornerRadius(2)
                             
                             Rectangle()
-                                .fill(Color.blue)
+                                .fill(LectraColors.brand)
                                 .frame(width: geometry.size.width * (audioManager.currentTime / max(audioManager.duration, 1)))
                                 .frame(height: 4)
                                 .cornerRadius(2)
@@ -123,14 +123,14 @@ struct LectureRecordCard: View {
                     
                     Text(formattedDuration)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(LectraColors.textSecondary)
                 }
                 .padding(.horizontal)
             }
         }
         .padding(.vertical, 20)
         .frame(maxWidth: .infinity)
-        .background(Color(.systemBackground))
+        .background(LectraColors.background)
         .cornerRadius(16)
         .shadow(radius: 8)
     }

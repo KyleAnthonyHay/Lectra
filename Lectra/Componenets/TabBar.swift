@@ -21,7 +21,7 @@ struct TabBar: View {
                     .font(.title2)
                     .foregroundColor(.white)
                     .padding(12)
-                    .background(Color.blue)
+                    .background(LectraColors.brand)
                     .clipShape(Circle())
             }
             .padding(.horizontal, 8)
@@ -30,7 +30,7 @@ struct TabBar: View {
             TabBarButton(icon: "gearshape", isSelected: false)
         }
         .padding(.vertical, 8)
-        .background(Color(.systemBackground))
+        .background(LectraColors.background)
         .overlay(Divider(), alignment: .top)
     }
 }
@@ -43,7 +43,7 @@ struct TabBarButton: View {
         Button(action: {}) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(isSelected ? .primary : .gray)
+                .foregroundColor(isSelected ? LectraColors.brand : LectraColors.textSecondary)
                 .frame(maxWidth: .infinity)
         }
     }

@@ -16,7 +16,7 @@ struct EmptyFolderView: View {
             
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 70))
-                .foregroundColor(.gray)
+                .foregroundColor(LectraColors.brandSecondary)
             
             Text("No Transcriptions Yet")
                 .font(.title2)
@@ -24,7 +24,7 @@ struct EmptyFolderView: View {
             
             Text("Tap the + button to create your first transcription in '\(folder.name)'")
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundColor(LectraColors.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -37,7 +37,7 @@ struct EmptyFolderView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
-                .background(Color.blue)
+                .background(LectraColors.brand)
                 .foregroundColor(.white)
                 .cornerRadius(8)
             }

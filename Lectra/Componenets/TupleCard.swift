@@ -9,7 +9,7 @@ struct TupleCard: View {
             // Header
             HStack {
                 Image(systemName: "waveform")
-                    .foregroundColor(.blue)
+                    .foregroundColor(LectraColors.brand)
                 Text(tuple.name)
                     .font(.headline)
                     .lineLimit(1)
@@ -20,11 +20,11 @@ struct TupleCard: View {
             HStack {
                 Text("audioManager.duration")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(LectraColors.textSecondary)
                 Spacer()
                 Text(formatDate(tuple.createdAt))
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(LectraColors.textSecondary)
             }
             
             // Playback Controls
@@ -39,7 +39,7 @@ struct TupleCard: View {
                     Image(systemName: audioManager.isPlaying ? "pause.fill" : "play.fill")
                         .foregroundColor(.white)
                         .frame(width: 32, height: 32)
-                        .background(Color.blue)
+                        .background(LectraColors.brand)
                         .clipShape(Circle())
                 }
                 
@@ -48,12 +48,12 @@ struct TupleCard: View {
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
                             Rectangle()
-                                .fill(Color.gray.opacity(0.2))
+                                .fill(LectraColors.brandLight)
                                 .frame(height: 4)
                             
                             Rectangle()
-                                .fill(Color.blue)
-                                .frame(width: geometry.size.width * 4, height: 4)
+                                .fill(LectraColors.brand)
+                                .frame(width: geometry.size.width * 0.4, height: 4)
                         }
                     }
                     .frame(height: 4)
@@ -61,7 +61,7 @@ struct TupleCard: View {
             }
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(LectraColors.secondaryBackground)
         .cornerRadius(12)
         .shadow(radius: 2)
     }
