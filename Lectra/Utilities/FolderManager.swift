@@ -97,4 +97,16 @@ class FolderManager: ObservableObject {
             print("Failed to rename tuple: \(error)")
         }
     }
+    
+    func renameFolder(_ folder: Folder, newName: String) {
+        folder.name = newName
+        
+        do {
+            try modelContext.save()
+            objectWillChange.send()
+            print("Successfully renamed folder to \(newName)")
+        } catch {
+            print("Failed to rename folder: \(error)")
+        }
+    }
 }

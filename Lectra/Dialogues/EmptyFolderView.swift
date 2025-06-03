@@ -8,28 +8,47 @@
 import SwiftUI
 
 struct EmptyFolderView: View {
-    var folder: Folder
-    @State private var isAnimating = false
+    let folder: Folder
     
     var body: some View {
         VStack(spacing: 20) {
-            // MARK: Animated Folder ICon
-            Image(systemName: "folder")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 100)
-                .foregroundStyle(.secondary)
-                .opacity(isAnimating ? 0.8 : 0.6)
-                .scaleEffect(isAnimating ? 1.05 : 1.0)
-                .animation(Animation.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnimating)
+            Spacer()
             
-            // Simple text showing the folder is empty
-            Text("\(folder.name) is empty")
-                .font(.headline)
-                .foregroundColor(.secondary)
-        }
-        .onAppear {
-            isAnimating = true
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.system(size: 70))
+                .foregroundColor(LectraColors.brandSecondary)
+            
+            Text("No Transcriptions Yet")
+                .font(.title2)
+                .fontWeight(.medium)
+            
+            Text("Tap the + button to create your first transcription in '\(folder.name)'")
+                .font(.body)
+                .foregroundColor(LectraColors.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            
+            Button(action: {
+                // Action to create new transcription
+            }) {
+                HStack {
+                    Image(systemName: "plus")
+                    Text("Create Transcription")
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(LectraColors.brand)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+            }
+            .padding(.top, 10)
+            
+            Spacer()
+            
+            // Add tab bar for consistency
+            TabBar(onAddButtonTapped: {
+                // Handle adding new transcription
+            })
         }
     }
 }

@@ -10,6 +10,10 @@ class AudioRecorderManager: NSObject, ObservableObject {
 
     @Published var isRecording = false
     @Published var isPlaying = false
+    @Published var hasRecording = false
+    @Published var duration: TimeInterval = 0
+    @Published var currentTime: TimeInterval = 0
+    private var timer: Timer?
 
     init(transcriptionTuple: TranscriptionTuple) {
         // Set the path to Documents/Transcriptions
@@ -28,9 +32,10 @@ class AudioRecorderManager: NSObject, ObservableObject {
 
         // Define the file path for recordings
         audioFileURL = audioRecordingDirectory.appendingPathComponent("Lecture-Recording.m4a")
-
+        
         super.init()
         configureAudioSession()
+        checkForExistingRecording()
     }
 
     private func configureAudioSession() {
@@ -43,6 +48,32 @@ class AudioRecorderManager: NSObject, ObservableObject {
             print("Failed to configure AVAudioSession: \(error.localizedDescription)")
         }
     }
+    
+    private func checkForExistingRecording() {
+        hasRecording = FileManager.default.fileExists(atPath: audioFileURL.path)
+        if hasRecording {
+            do {
+                let player = try AVAudioPlayer(contentsOf: audioFileURL)
+                duration = player.duration
+            } catch {
+                print("Error getting audio duration: \(error)")
+            }
+        }
+    }
+    
+    private func startTimer() {
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self = self, let player = self.audioPlayer else { return }
+            self.currentTime = player.currentTime
+        }
+    }
+    
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+        currentTime = 0
+    }
 
     func startRecording() {
         let settings: [String: Any] = [
@@ -51,82 +82,78 @@ class AudioRecorderManager: NSObject, ObservableObject {
             AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
-
+        
         do {
             audioRecorder = try AVAudioRecorder(url: audioFileURL, settings: settings)
-            audioRecorder?.prepareToRecord()
+            audioRecorder?.delegate = self
             audioRecorder?.record()
             isRecording = true
-            print("Recording started successfully at \(audioFileURL.path)")
+            print("Started recording")
         } catch {
-            print("Error starting recording: \(error.localizedDescription)")
+            print("Failed to start recording: \(error.localizedDescription)")
         }
     }
-
-    func stopRecording(modelContext: ModelContext? = nil, transcriptionTuple: TranscriptionTuple) {
+    
+    func stopRecording(modelContext: ModelContext, transcriptionTuple: TranscriptionTuple) {
         audioRecorder?.stop()
         isRecording = false
-        print("Recording stopped successfully. File saved at \(audioFileURL.path)")
+        hasRecording = true
         
-        if let context = modelContext {
-            do {
-                let audioData = try getAudioData()
-                let audioFile = AudioFile(name: transcriptionTuple.name, audioData: audioData)
-                transcriptionTuple.audioFile = audioFile
-                context.insert(transcriptionTuple)
-                try context.save()
-                print("CoreData: Save Successful :)")
-            } catch {
-                print("Error Saving audio Data to SwiftData: \(error.localizedDescription)")
-            }
+        // Get the duration of the recording
+        if let player = try? AVAudioPlayer(contentsOf: audioFileURL) {
+            duration = player.duration
+        }
+        
+        // Create and save AudioFile
+        do {
+            let audioData = try Data(contentsOf: audioFileURL)
+            let audioFile = AudioFile(name: transcriptionTuple.name, audioData: audioData)
+            transcriptionTuple.audioFile = audioFile
+            try modelContext.save()
+            print("Successfully saved audio file")
+        } catch {
+            print("Failed to save audio file: \(error)")
         }
     }
-
+    
     func playAudio() {
-        guard !isRecording else {
-            print("Cannot play while recording")
-            return
-        }
-
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: audioFileURL)
             audioPlayer?.delegate = self
             audioPlayer?.play()
             isPlaying = true
-            print("Audio playback started")
+            startTimer()
+            print("Started playing audio")
         } catch {
             print("Failed to play audio: \(error.localizedDescription)")
         }
     }
     
+    func stopAudio() {
+        audioPlayer?.stop()
+        isPlaying = false
+        stopTimer()
+        print("Stopped playing audio")
+    }
+    
     func playSwiftDataAudio(tuple: TranscriptionTuple) {
-        guard !isRecording else {
-            print("Cannot play while recording")
-            return
-        }
-        // Safely unwrap the optional audioData
-        guard let audioData = tuple.audioFile?.audioData else {
-            print("No audio data available")
+        guard let audioFile = tuple.audioFile else {
+            print("No audio file found")
             return
         }
         
         do {
-            audioPlayer = try AVAudioPlayer(data: audioData)
+            audioPlayer = try AVAudioPlayer(data: audioFile.audioData)
             audioPlayer?.delegate = self
             audioPlayer?.play()
             isPlaying = true
-            print("Audio playback started from SwiftData audio")
+            startTimer()
+            print("Started playing SwiftData audio")
         } catch {
-            print("Failed to play swift data audio: \(error.localizedDescription)")
+            print("Failed to play SwiftData audio: \(error.localizedDescription)")
         }
     }
-
-    func stopAudio() {
-        audioPlayer?.stop()
-        isPlaying = false
-        print("Audio playback stopped")
-    }
-
+    
     func getAudioData() throws -> Data {
         return try Data(contentsOf: audioFileURL)
     }
@@ -147,80 +174,11 @@ class AudioRecorderManager: NSObject, ObservableObject {
         }
     }
     
-    // MARK: Audio Splitting
-//    func splitAudioIntoTwoMinuteSegments(from audioData: Data) async throws -> [Data] {
-//        guard let originalAudioData = tuple.audioFile?.audioData else {
-//            throw NSError(
-//                domain: "AudioRecorderManager",
-//                code: 1,
-//                userInfo: [NSLocalizedDescriptionKey: "No audio data available"]
-//            )
-//        }
-//        
-//        // Create a temporary file to work with AVAsset
-//        let tempDirectory = FileManager.default.temporaryDirectory
-//        let tempURL = tempDirectory.appendingPathComponent(UUID().uuidString + ".m4a")
-//        try originalAudioData.write(to: tempURL)
-//        
-//        let asset = AVURLAsset(url: tempURL)
-//        let duration = try await asset.load(.duration)
-//        let durationInSeconds = CMTimeGetSeconds(duration)
-//        let segmentDuration: Double = 5 // 2 minutes is 120 seconds
-//        let numberOfSegments = Int(ceil(durationInSeconds / segmentDuration))
-//        var segments: [Data] = []
-//        
-//        for i in 0..<numberOfSegments {
-//            let startTime = Double(i) * segmentDuration
-//            let segmentTime = min(segmentDuration, durationInSeconds - startTime)
-//            
-//            let timeRange = CMTimeRange(
-//                start: CMTime(seconds: startTime, preferredTimescale: 1000),
-//                duration: CMTime(seconds: segmentTime, preferredTimescale: 1000)
-//            )
-//            
-//            let segmentURL = tempDirectory.appendingPathComponent("segment_\(i).m4a")
-//            
-//            // Create export session for this segment
-//            guard let exportSession = AVAssetExportSession(
-//                asset: asset,
-//                presetName: AVAssetExportPresetAppleM4A
-//            ) else {
-//                continue
-//            }
-//            
-////            exportSession.outputURL = segmentURL
-////            exportSession.outputFileType = .m4a
-//            exportSession.timeRange = timeRange
-//            
-//            // Export synchronously within async context
-//            try await exportSession.export(to: segmentURL, as: .m4a)
-//            
-//            do {
-//                // Use the new async/throws export method
-//                try await exportSession.export(to: segmentURL, as: .m4a)
-//                
-//                if let segmentData = try? Data(contentsOf: segmentURL) {
-//                    segments.append(segmentData)
-//                }
-//            } catch {
-//                print("Export error for segment \(i): \(error.localizedDescription)")
-//            }
-//            
-//            if let segmentData = try? Data(contentsOf: segmentURL) {
-//                segments.append(segmentData)
-//            }
-//            
-//            // Clean up segment file
-//            try? FileManager.default.removeItem(at: segmentURL)
-//        }
-//        
-//        // Clean up temporary file
-//        try? FileManager.default.removeItem(at: tempURL)
-//        
-//        return segments
-//    }
+   
 
 }
+
+// MARK: Audio Splitting
 extension AudioRecorderManager {
     func splitAudioIntoTwoMinuteSegments(from audioData: Data) async throws -> [Data] {
         // Create a temporary file to work with AVAsset
@@ -280,10 +238,20 @@ extension AudioRecorderManager {
     }
 }
 
-extension AudioRecorderManager: AVAudioPlayerDelegate {
+extension AudioRecorderManager: AVAudioRecorderDelegate, AVAudioPlayerDelegate {
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        isRecording = false
+        hasRecording = flag
+        if flag {
+            if let player = try? AVAudioPlayer(contentsOf: audioFileURL) {
+                duration = player.duration
+            }
+        }
+    }
+    
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         isPlaying = false
-        print("Audio playback finished")
+        stopTimer()
     }
 }
 
