@@ -54,18 +54,15 @@ struct GenerateNotesCard: View {
                                     .scaleEffect(0.8)
                             } else {
                                 Image(systemName: "sparkles")
-                                    .foregroundColor(!audioManager.hasRecording ? Color.gray : .white)
+                                    .foregroundColor(.white)
                             }
                             Text(isGenerating ? "Generating..." : "Generate")
                                 .font(.custom("Inter", size: 18).weight(.medium))
-                                .foregroundColor(!audioManager.hasRecording ? Color.gray : .white)
+                                .foregroundColor(.white)
                         }
                         .padding()
                         .frame(width: 292, height: 49)
-                        .background(
-                            !audioManager.hasRecording ? Color.gray.opacity(0.3) :
-                            (isGenerating ? Color.gray : Color.icon)
-                        )
+                        .background(isGenerating ? Color.gray : Color.icon)
                         .cornerRadius(9)
                         .shadow(radius: 5)
                     }

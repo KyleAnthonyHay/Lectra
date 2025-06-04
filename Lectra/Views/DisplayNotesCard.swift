@@ -26,7 +26,6 @@ struct DisplayNotesCard: View {
         ## Ownership
 
         - Owns a Production Company
-        - Walk with Christ
         """
     var gptResponse: String?
     @ObservedObject var audioManager: AudioRecorderManager
@@ -67,9 +66,6 @@ struct DisplayNotesCard: View {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         showSaveConfirmation = true
                     }
-                    
-                    // Clear audio after successful save
-                    audioManager.clearRecordedAudio()
                     
                     // Reset states after delay
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

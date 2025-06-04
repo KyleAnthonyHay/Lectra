@@ -46,7 +46,6 @@ struct RecordView: View {
                     
                     AudioUploadButton(transcriptionTuple: transcriptionTuple, 
                                     folder: folder!,
-                                    audioRecorder: audioManager,
                                     isGenerating: $isGenerating,
                                     isTranscribing: $isTranscribing)
                 }
@@ -79,11 +78,8 @@ struct RecordView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(
-                            !audioManager.hasRecording ? Color.gray.opacity(0.3) :
-                            (isGenerating || isTranscribing ? Color.gray : Color.blue)
-                        )
-                        .foregroundColor(!audioManager.hasRecording ? Color.gray : .white)
+                        .background(isGenerating || isTranscribing ? Color.gray : Color.blue)
+                        .foregroundColor(.white)
                         .cornerRadius(10)
                         .animation(.easeInOut, value: isGenerating)
                         .animation(.easeInOut, value: isTranscribing)
@@ -142,7 +138,6 @@ struct RecordView: View {
                 await MainActor.run {
                     gptResponse = result
                     isGenerating = false
-                    // Audio will be cleared after successful save
                 }
             } catch {
                 await MainActor.run {

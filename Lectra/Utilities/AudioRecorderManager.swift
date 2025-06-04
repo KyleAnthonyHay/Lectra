@@ -221,38 +221,6 @@ class AudioRecorderManager: NSObject, ObservableObject {
         }
     }
     
-    func clearRecordedAudio() {
-        do {
-            if FileManager.default.fileExists(atPath: audioFileURL.path) {
-                try FileManager.default.removeItem(at: audioFileURL)
-                print("Successfully cleared audio file")
-            }
-            hasRecording = false
-            duration = 0
-            currentTime = 0
-        } catch {
-            print("Failed to clear audio file: \(error)")
-        }
-    }
-    
-    func saveUploadedAudio(data: Data, modelContext: ModelContext, transcriptionTuple: TranscriptionTuple) throws {
-        // 1. Save to file system
-        try data.write(to: audioFileURL)
-        hasRecording = true
-        
-        // Get the duration of the uploaded audio
-        if let player = try? AVAudioPlayer(contentsOf: audioFileURL) {
-            duration = player.duration
-        }
-        
-        // 2. Save to SwiftData
-        let audioFile = AudioFile(name: transcriptionTuple.name, audioData: data)
-        transcriptionTuple.audioFile = audioFile
-        try modelContext.save()
-        
-        print("Successfully saved uploaded audio to both file system and SwiftData")
-    }
-    
 }
 
 // MARK: Audio Splitting
