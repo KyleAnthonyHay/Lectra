@@ -71,7 +71,14 @@ struct GenerateNotesCard: View {
                 )
                 
                 // Process all segments and get final response
-                let result = try await openAIClient.processAudioSegments(audioSegments: audioSegments)
+                let result = try await openAIClient.processAudioSegments(
+                    audioSegments: audioSegments,
+                    onUpdate: { streamUpdate in
+                        Task { @MainActor in
+                            self.gptResponse = streamUpdate
+                        }
+                    }
+                )
                 
                 await MainActor.run {
                     print("Transcription Result: \(result)")

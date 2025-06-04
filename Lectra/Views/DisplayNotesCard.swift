@@ -32,6 +32,13 @@ struct DisplayNotesCard: View {
     @EnvironmentObject var transcriptionTuple: TranscriptionTuple
     @Environment(\.modelContext) private var modelContext
 
+    var displayText: String {
+        if !audioManager.streamedTranscription.isEmpty {
+            return audioManager.streamedTranscription
+        }
+        return gptResponse ?? defaultResponse
+    }
+
     var body: some View {
         ZStack(alignment: .leading) {
             // Background card with shadow
@@ -41,19 +48,18 @@ struct DisplayNotesCard: View {
 
             // Content
             VStack(alignment: .leading, spacing: 10) {
-
                 // GPT Response or Default Text
-                Markdown(gptResponse ?? defaultResponse)
+                Markdown(displayText)
                     .markdownTheme(.gitHub)
                     .textSelection(.enabled)
                     .padding(20)
+                    .animation(.easeInOut, value: audioManager.streamedTranscription)
 
                 // Save Button
                 Button(action: {
-                    let markdown = gptResponse ?? defaultResponse
-                    saveMarkdownAsPDF(markdown: markdown) // Save as PDF
+                    saveMarkdownAsPDF(markdown: displayText) // Save as PDF
                     // Save to swift data
-                    audioManager.saveTranscription(modelContext: modelContext, tuple: transcriptionTuple, transcription: gptResponse ?? defaultResponse)
+                    audioManager.saveTranscription(modelContext: modelContext, tuple: transcriptionTuple, transcription: displayText)
                     
                     print("Save button tapped")
                 }) {

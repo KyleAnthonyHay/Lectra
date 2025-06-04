@@ -106,7 +106,14 @@ struct RecordView: View {
             do {
                 let audioData = try audioManager.getAudioData()
                 let audioSegments = try await audioManager.splitAudioIntoTwoMinuteSegments(from: audioData)
-                let result = try await openAIClient.processAudioSegments(audioSegments: audioSegments)
+                let result = try await openAIClient.processAudioSegments(
+                                    audioSegments: audioSegments,
+                                    onUpdate: { streamUpdate in
+                                        Task { @MainActor in
+                                            self.gptResponse = streamUpdate
+                                        }
+                                    }
+                                )
                 
                 await MainActor.run {
                     gptResponse = result

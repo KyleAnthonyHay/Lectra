@@ -16,21 +16,21 @@ You are a Christian sermon note-taking assistant. When summarizing transcripts, 
 1. Always return output in valid Markdown.  
 2. Begin with a clear title in H1 format (e.g., “# Sermon Notes: [Sermon Title]”).  
 3. Capture each point as a direct observation—not prefaced by “the preacher said,” but also not overly casual. For example:  
-   - “God’s grace transforms lives…” instead of “The preacher said that God’s grace transforms lives.”  
-   - “Faith means trusting even when…” rather than “I felt that faith means trusting….”  
-4. Organize main ideas as top-level bullets (use “- ”).  
+   - “God's grace transforms lives…" instead of "The preacher said that God's grace transforms lives."  
+   - "Faith means trusting even when…" rather than "I felt that faith means trusting…."  
+4. Organize main ideas as top-level bullets (use "- ").  
 5. If the sermon quotes, paraphrases, or alludes to any Scripture passage:  
-   - Identify the correct reference (e.g., Hebrews 11:1) even if it’s not quoted verbatim.  
-   - Create a separate bullet for that reference (e.g., “- **Scripture: Hebrews 11:1**”).  
-   - Under that bullet, add exactly one sub-bullet (use “  - ”) explaining how the verse was used and what it contributes to the sermon’s message.  
+   - Identify the correct reference (e.g., Hebrews 11:1) even if it's not quoted verbatim.  
+   - Create a separate bullet for that reference (e.g., "- **Scripture: Hebrews 11:1**").  
+   - Under that bullet, add exactly one sub-bullet (use "  - ") explaining how the verse was used and what it contributes to the sermon's message.  
 6. Group related ideas into Categories and, if needed, Subcategories. For example:  
-   - **Category: God’s Love**  
+   - **Category: God's Love**  
      - **Subcategory: Demonstrated in Christ**  
-       - God’s sacrifice shows…  
-7. Capture any “fiery one-liners” or memorable phrases (especially alliterations) used in the sermon verbatim, placing them as separate bullets or integrated under relevant points. For example:  
-   - “God will prepare you for where He’s going to take you.”  
-8. Maintain a slightly personal tone—write as a Christian genuinely taking notes, without sounding like a generic AI. Avoid “the preacher said” or overly formal academic phrasing. Keep it clear but not stiff.  
-9. Do not add extra commentary or reflections that weren’t part of the sermon itself.  
+       - God's sacrifice shows…  
+7. Capture any "fiery one-liners" or memorable phrases (especially alliterations) used in the sermon verbatim, placing them as separate bullets or integrated under relevant points. For example:  
+   - "God will prepare you for where He's going to take you."  
+8. Maintain a slightly personal tone—write as a Christian genuinely taking notes, without sounding like a generic AI. Avoid "the preacher said" or overly formal academic phrasing. Keep it clear but not stiff.  
+9. Do not add extra commentary or reflections that weren't part of the sermon itself.  
 
 When given the raw transcript, produce a Markdown document that matches these requirements exactly.
 """
@@ -68,7 +68,7 @@ When given the raw transcript, produce a Markdown document that matches these re
         }
     }
     
-    func processAudioSegments(audioSegments: [Data]) async throws -> String {
+    func processAudioSegments(audioSegments: [Data], onUpdate: @escaping (String) -> Void) async throws -> String {
         var allTranscriptions: [String] = []
         
         for (index, segmentData) in audioSegments.enumerated() {
@@ -95,9 +95,18 @@ When given the raw transcript, produce a Markdown document that matches these re
             model: .gpt4o
         )
         
-        // Generate final markdown summary
-        let chatCompletion = try await service.startChat(parameters: chatParameters)
-        return chatCompletion.choices.first?.message.content ?? "No Transcription Summary from Model."
+        // Start streaming chat completion
+        var fullResponse = ""
+        let stream = try await service.startStreamedChat(parameters: chatParameters)
+        
+        for try await result in stream {
+            if let content = result.choices.first?.delta.content {
+                fullResponse += content
+                onUpdate(fullResponse)
+            }
+        }
+        
+        return fullResponse
     }
     
     func cancelProcessingTask() {
@@ -112,5 +121,3 @@ When given the raw transcript, produce a Markdown document that matches these re
         case error(Error)
     }
 }
-
-

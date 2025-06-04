@@ -13,7 +13,9 @@ class AudioRecorderManager: NSObject, ObservableObject {
     @Published var hasRecording = false
     @Published var duration: TimeInterval = 0
     @Published var currentTime: TimeInterval = 0
+    @Published var streamedTranscription: String = ""
     private var timer: Timer?
+    private let openAIClient = OpenAIClientWrapper()
 
     init(transcriptionTuple: TranscriptionTuple) {
         // Set the path to Documents/Transcriptions
@@ -174,8 +176,27 @@ class AudioRecorderManager: NSObject, ObservableObject {
         }
     }
     
-   
-
+    func processAudioWithStreaming() async throws {
+        guard let audioFile = try? getAudioData() else {
+            print("No audio data available")
+            return
+        }
+        
+        let segments = try await splitAudioIntoTwoMinuteSegments(from: audioFile)
+        
+        // Process segments with streaming updates
+        let transcription = try await openAIClient.processAudioSegments(audioSegments: segments) { [weak self] update in
+            Task { @MainActor in
+                self?.streamedTranscription = update
+            }
+        }
+        
+        // Final update with complete transcription
+        await MainActor.run {
+            self.streamedTranscription = transcription
+        }
+    }
+    
 }
 
 // MARK: Audio Splitting
