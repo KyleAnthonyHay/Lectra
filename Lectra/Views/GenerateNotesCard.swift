@@ -14,48 +14,55 @@ struct GenerateNotesCard: View {
 
     var body: some View {
         // MARK: Generate Notes Card
-        ZStack {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.background)
-                .frame(width: 363, height: 188)
-                .shadow(radius: 8)
-            
-            VStack(alignment: .leading, spacing: 16) {
-                // Header Text
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Generate Notes")
-                        .font(.custom("Inter", size: 24).weight(.heavy))
-                        .foregroundColor(.textSet)
-
-                    Text("Transcribe lectures into concise PowerPoints and detailed notes for efficient learning.")
-                        .font(.custom("Inter", size: 12))
-                        .foregroundColor(.secondary)
-                }
-                .frame(width: 250)
-
-                // Generate Button
-                Button(action: generateNotes) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "sparkles")
-                            .foregroundColor(.white)
-                        Text("Generate")
-                            .font(.custom("Inter", size: 18).weight(.medium))
-                            .foregroundColor(.white)
-                    }
-                    .padding()
-                    .frame(width: 292, height: 49)
-                    .background(.icon)
-                    .cornerRadius(9)
-                    .shadow(radius: 5)
-                }
-
+        PhaseAnimator(CardAnimationPhase.allCases) { phase in
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.background)
+                    .frame(width: 363, height: 188)
+                    .shadow(radius: 8)
+                    .cardAnimation(phase, for: .card)
                 
+                VStack(alignment: .leading, spacing: 16) {
+                    // Header Text
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Generate Notes")
+                            .font(.custom("Inter", size: 24).weight(.heavy))
+                            .foregroundColor(.textSet)
+                            .cardAnimation(phase, for: .header)
+
+                        Text("Transcribe lectures into concise PowerPoints and detailed notes for efficient learning.")
+                            .font(.custom("Inter", size: 12))
+                            .foregroundColor(.secondary)
+                            .cardAnimation(phase, for: .subtext)
+                    }
+                    .frame(width: 250)
+
+                    // Generate Button
+                    Button(action: generateNotes) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkles")
+                                .foregroundColor(.white)
+                            Text("Generate")
+                                .font(.custom("Inter", size: 18).weight(.medium))
+                                .foregroundColor(.white)
+                        }
+                        .padding()
+                        .frame(width: 292, height: 49)
+                        .background(.icon)
+                        .cornerRadius(9)
+                        .shadow(radius: 5)
+                    }
+                    .cardAnimation(phase, for: .button)
+                }
             }
+            .frame(width: 363, height: 188)
+        } animation: { phase in
+            phase.animation
         }
-        .frame(width: 363, height: 188)
+        
         // MARK: Display Notes Card
         if let response = gptResponse {
-            DisplayNotesCard(gptResponse: response,audioManager: audioManager)
+            DisplayNotesCard(gptResponse: response, audioManager: audioManager)
         }
     }
 
@@ -89,10 +96,7 @@ struct GenerateNotesCard: View {
             }
         }
     }
-
 }
-
-
 
 #Preview {
     GenerateNotesCard(
