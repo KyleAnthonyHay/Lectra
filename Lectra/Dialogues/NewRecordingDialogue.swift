@@ -84,7 +84,7 @@ struct NewRecordingDialog: View {
         }
         .padding()
         .frame(maxWidth: 300)
-        .background(Color(UIColor.systemBackground))
+        .background(LectraColors.background)
         .cornerRadius(16)
         .shadow(radius: 8)
         .onAppear {

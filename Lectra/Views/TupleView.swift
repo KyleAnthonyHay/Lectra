@@ -27,7 +27,7 @@ struct TupleView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemBackground).edgesIgnoringSafeArea(.all)
+                LectraColors.background.edgesIgnoringSafeArea(.all)
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
@@ -64,7 +64,7 @@ struct TupleView: View {
                                         .foregroundColor(.gray)
                                     
                                     Markdown(transcription)
-                                        .markdownTheme(.gitHub)
+                                        .markdownTheme(.lectraClearBackground)
                                         .textSelection(.enabled)
                                         .padding(20)
                                 }

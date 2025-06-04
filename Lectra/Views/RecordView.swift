@@ -11,6 +11,7 @@ struct RecordView: View {
     private let openAIClient = OpenAIClientWrapper()
     @State private var gptResponse: String? = nil
     @State private var isGenerating = false
+    @State private var isTranscribing = false
     @State private var errorMessage: String? = nil
     @StateObject var transcriptionTuple: TranscriptionTuple
     @StateObject var audioManager: AudioRecorderManager
@@ -30,14 +31,24 @@ struct RecordView: View {
         ScrollView {
             VStack(spacing: 24) {
                 // Header
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(tupleName)
-                        .font(.title)
-                        .fontWeight(.bold)
+                HStack {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(tupleName)
+                            .font(.title)
+                            .fontWeight(.bold)
+                        
+                        Text("Record your lecture and generate notes")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
                     
-                    Text("Record your lecture and generate notes")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                    Spacer()
+                    
+                    AudioUploadButton(transcriptionTuple: transcriptionTuple, 
+                                    folder: folder!,
+                                    audioRecorder: audioManager,
+                                    isGenerating: $isGenerating,
+                                    isTranscribing: $isTranscribing)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
@@ -57,23 +68,27 @@ struct RecordView: View {
                     
                     Button(action: generateNotes) {
                         HStack {
-                            if isGenerating {
+                            if isGenerating || isTranscribing {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                     .scaleEffect(0.8)
                             } else {
                                 Image(systemName: "sparkles")
                             }
-                            Text(isGenerating ? "Generating..." : "Generate Notes")
+                            Text(buttonText)
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isGenerating ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
+                        .background(
+                            !audioManager.hasRecording ? Color.gray.opacity(0.3) :
+                            (isGenerating || isTranscribing ? Color.gray : Color.blue)
+                        )
+                        .foregroundColor(!audioManager.hasRecording ? Color.gray : .white)
                         .cornerRadius(10)
                         .animation(.easeInOut, value: isGenerating)
+                        .animation(.easeInOut, value: isTranscribing)
                     }
-                    .disabled(isGenerating || !audioManager.hasRecording)
+                    .disabled(isGenerating || isTranscribing || !audioManager.hasRecording)
                     
                     if let error = errorMessage {
                         Text(error)
@@ -83,7 +98,6 @@ struct RecordView: View {
                     }
                 }
                 .padding()
-                .background(Color(.secondarySystemBackground))
                 .cornerRadius(12)
                 .padding(.horizontal)
                 
@@ -98,6 +112,16 @@ struct RecordView: View {
         .environmentObject(transcriptionTuple)
     }
     
+    private var buttonText: String {
+        if isTranscribing {
+            return "Transcribing..."
+        } else if isGenerating {
+            return "Generating..."
+        } else {
+            return "Generate Notes"
+        }
+    }
+    
     private func generateNotes() {
         isGenerating = true
         errorMessage = nil
@@ -106,11 +130,19 @@ struct RecordView: View {
             do {
                 let audioData = try audioManager.getAudioData()
                 let audioSegments = try await audioManager.splitAudioIntoTwoMinuteSegments(from: audioData)
-                let result = try await openAIClient.processAudioSegments(audioSegments: audioSegments)
+                let result = try await openAIClient.processAudioSegments(
+                                    audioSegments: audioSegments,
+                                    onUpdate: { streamUpdate in
+                                        Task { @MainActor in
+                                            self.gptResponse = streamUpdate
+                                        }
+                                    }
+                                )
                 
                 await MainActor.run {
                     gptResponse = result
                     isGenerating = false
+                    // Audio will be cleared after successful save
                 }
             } catch {
                 await MainActor.run {

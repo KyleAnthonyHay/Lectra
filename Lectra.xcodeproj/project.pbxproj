@@ -8,8 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		850B32762D1531C1003B286F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 850B32752D1531C1003B286F /* README.md */; };
-		85246A182D72B48800661125 /* OpenAIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 85246A172D72B48800661125 /* OpenAIKit */; };
-		858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 858C60FE2D19D8D1002E041D /* XCAOpenAIClient */; };
+		856946A92DF067020040ED6E /* SwiftOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 856946A82DF067020040ED6E /* SwiftOpenAI */; };
 		85DF7C0D2D1C5B0C00D64075 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */; };
 /* End PBXBuildFile section */
 
@@ -45,9 +44,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				858C60FF2D19D8D1002E041D /* XCAOpenAIClient in Frameworks */,
+				856946A92DF067020040ED6E /* SwiftOpenAI in Frameworks */,
 				85DF7C0D2D1C5B0C00D64075 /* MarkdownUI in Frameworks */,
-				85246A182D72B48800661125 /* OpenAIKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,9 +90,8 @@
 			);
 			name = Lectra;
 			packageProductDependencies = (
-				858C60FE2D19D8D1002E041D /* XCAOpenAIClient */,
 				85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */,
-				85246A172D72B48800661125 /* OpenAIKit */,
+				856946A82DF067020040ED6E /* SwiftOpenAI */,
 			);
 			productName = Lectra;
 			productReference = 850B32642D152FD5003B286F /* Lectra.app */;
@@ -125,9 +122,8 @@
 			mainGroup = 850B325B2D152FD5003B286F;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */,
 				85DF7C0B2D1C5B0C00D64075 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
-				85246A162D72B48800661125 /* XCRemoteSwiftPackageReference "OpenAI" */,
+				856946A72DF067020040ED6E /* XCRemoteSwiftPackageReference "SwiftOpenAI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 850B32652D152FD5003B286F /* Products */;
@@ -370,20 +366,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		85246A162D72B48800661125 /* XCRemoteSwiftPackageReference "OpenAI" */ = {
+		856946A72DF067020040ED6E /* XCRemoteSwiftPackageReference "SwiftOpenAI" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/FuturraGroup/OpenAI.git";
+			repositoryURL = "https://github.com/jamesrochabrun/SwiftOpenAI";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.9.3;
-			};
-		};
-		858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/alfianlosari/XCAOpenAIClient.git";
-			requirement = {
-				branch = main;
-				kind = branch;
+				minimumVersion = 2.0.0;
 			};
 		};
 		85DF7C0B2D1C5B0C00D64075 /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
@@ -397,15 +385,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		85246A172D72B48800661125 /* OpenAIKit */ = {
+		856946A82DF067020040ED6E /* SwiftOpenAI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 85246A162D72B48800661125 /* XCRemoteSwiftPackageReference "OpenAI" */;
-			productName = OpenAIKit;
-		};
-		858C60FE2D19D8D1002E041D /* XCAOpenAIClient */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 858C60FD2D19D8D1002E041D /* XCRemoteSwiftPackageReference "XCAOpenAIClient" */;
-			productName = XCAOpenAIClient;
+			package = 856946A72DF067020040ED6E /* XCRemoteSwiftPackageReference "SwiftOpenAI" */;
+			productName = SwiftOpenAI;
 		};
 		85DF7C0C2D1C5B0C00D64075 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;

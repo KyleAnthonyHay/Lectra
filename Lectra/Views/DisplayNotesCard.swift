@@ -26,59 +26,101 @@ struct DisplayNotesCard: View {
         ## Ownership
 
         - Owns a Production Company
+        - Walk with Christ
         """
     var gptResponse: String?
     @ObservedObject var audioManager: AudioRecorderManager
     @EnvironmentObject var transcriptionTuple: TranscriptionTuple
     @Environment(\.modelContext) private var modelContext
+    @State private var isSaving = false
+    @State private var showSaveConfirmation = false
+
+    var displayText: String {
+        if !audioManager.streamedTranscription.isEmpty {
+            return audioManager.streamedTranscription
+        }
+        return gptResponse ?? defaultResponse
+    }
 
     var body: some View {
-        ZStack(alignment: .leading) {
-            // Background card with shadow
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.background)
-                .shadow(radius: 3)
+        VStack(alignment: .leading, spacing: 10) {
+            // GPT Response or Default Text
+            Markdown(displayText)
+                .markdownTheme(.lectraClearBackground)
+                .textSelection(.enabled)
+                .padding(.horizontal)
+                .animation(.easeInOut, value: audioManager.streamedTranscription)
 
-            // Content
-            VStack(alignment: .leading, spacing: 10) {
-
-                // GPT Response or Default Text
-                Markdown(gptResponse ?? defaultResponse)
-                    .markdownTheme(.gitHub)
-                    .textSelection(.enabled)
-                    .padding(20)
-
-                // Save Button
+            // Save Button
+            HStack {
+                Spacer()
                 Button(action: {
-                    let markdown = gptResponse ?? defaultResponse
-                    saveMarkdownAsPDF(markdown: markdown) // Save as PDF
-                    // Save to swift data
-                    audioManager.saveTranscription(modelContext: modelContext, tuple: transcriptionTuple, transcription: gptResponse ?? defaultResponse)
+                    withAnimation {
+                        isSaving = true
+                    }
                     
-                    print("Save button tapped")
+                    // Save actions
+                    saveMarkdownAsPDF(markdown: displayText)
+                    audioManager.saveTranscription(modelContext: modelContext, tuple: transcriptionTuple, transcription: displayText)
+                    
+                    // Show confirmation
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showSaveConfirmation = true
+                    }
+                    
+                    // Clear audio after successful save
+                    audioManager.clearRecordedAudio()
+                    
+                    // Reset states after delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation {
+                            isSaving = false
+                            showSaveConfirmation = false
+                        }
+                    }
                 }) {
-                    Image(systemName: "square.and.arrow.down")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(.icon)
-                        .cornerRadius(9)
-                        .shadow(radius: 5)
+                    HStack(spacing: 8) {
+                        if isSaving {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(0.8)
+                        } else if showSaveConfirmation {
+                            Image(systemName: "checkmark")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                                .transition(.scale.combined(with: .opacity))
+                        } else {
+                            Image(systemName: "square.and.arrow.down")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                        }
+                        
+                        if !isSaving {
+                            Text(showSaveConfirmation ? "Saved!" : "Save")
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(showSaveConfirmation ? Color.green : LectraColors.brand)
+                            .shadow(radius: 3)
+                    )
+                    .scaleEffect(isSaving ? 0.95 : 1.0)
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.trailing, 20)
-                .padding(.bottom, 20)
+                .disabled(isSaving)
+                .padding(.trailing)
+                .padding(.bottom)
             }
         }
-        .frame(maxWidth: 360) // Card width is fixed, height adjusts dynamically
-        .background(Color.background)
-        .cornerRadius(16)
-        .shadow(radius: 3)
+        .padding(.top)
     }
 }
 
 #Preview {
-    DisplayNotesCard(gptResponse: nil, audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple)) // Preview with default text
+    DisplayNotesCard(gptResponse: nil, audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple))
 }

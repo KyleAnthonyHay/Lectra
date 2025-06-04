@@ -21,7 +21,7 @@ struct FolderView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemBackground).edgesIgnoringSafeArea(.all)
+                LectraColors.background.edgesIgnoringSafeArea(.all)
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
