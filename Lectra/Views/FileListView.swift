@@ -50,7 +50,7 @@ struct FileListView: View {
         } else {
             NavigationStack {
                 ZStack {
-                    Color(.systemBackground).edgesIgnoringSafeArea(.all)
+                    LectraColors.background.edgesIgnoringSafeArea(.all)
                     
                     ScrollView {
                         VStack(spacing: 20) {

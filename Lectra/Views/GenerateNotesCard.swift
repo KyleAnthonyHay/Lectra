@@ -10,8 +10,10 @@ import SwiftUI
 struct GenerateNotesCard: View {
     @ObservedObject var audioManager: AudioRecorderManager
     let openAIClient: OpenAIClientWrapper
-    @State private var gptResponse: String? = nil // Optional to store GPT response
-
+    @State private var gptResponse: String? = nil
+    @State private var isGenerating = false
+    @State private var errorMessage: String? = nil
+    
     var body: some View {
         // MARK: Generate Notes Card
         PhaseAnimator(CardAnimationPhase.allCases) { phase in
@@ -34,24 +36,40 @@ struct GenerateNotesCard: View {
                             .font(.custom("Inter", size: 12))
                             .foregroundColor(.secondary)
                             .cardAnimation(phase, for: .subtext)
+                            
+                        if let error = errorMessage {
+                            Text(error)
+                                .font(.custom("Inter", size: 12))
+                                .foregroundColor(.red)
+                        }
                     }
                     .frame(width: 250)
 
                     // Generate Button
                     Button(action: generateNotes) {
                         HStack(spacing: 8) {
-                            Image(systemName: "sparkles")
-                                .foregroundColor(.white)
-                            Text("Generate")
+                            if isGenerating {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "sparkles")
+                                    .foregroundColor(!audioManager.hasRecording ? Color.gray : .white)
+                            }
+                            Text(isGenerating ? "Generating..." : "Generate")
                                 .font(.custom("Inter", size: 18).weight(.medium))
-                                .foregroundColor(.white)
+                                .foregroundColor(!audioManager.hasRecording ? Color.gray : .white)
                         }
                         .padding()
                         .frame(width: 292, height: 49)
-                        .background(.icon)
+                        .background(
+                            !audioManager.hasRecording ? Color.gray.opacity(0.3) :
+                            (isGenerating ? Color.gray : Color.icon)
+                        )
                         .cornerRadius(9)
                         .shadow(radius: 5)
                     }
+                    .disabled(isGenerating || !audioManager.hasRecording)
                     .cardAnimation(phase, for: .button)
                 }
             }
@@ -67,32 +85,50 @@ struct GenerateNotesCard: View {
     }
 
     private func generateNotes() {
-        print("Generate Button Pressed")
+        guard audioManager.hasRecording else {
+            errorMessage = "No recording found. Please record or import audio first."
+            return
+        }
+        
+        isGenerating = true
+        errorMessage = nil
+        
         Task {
             do {
-                let audioData = try audioManager.getAudioData() // Fetch audio data
+                print("Starting transcription process...")
+                let audioData = try audioManager.getAudioData()
+                print("Audio data retrieved, size: \(audioData.count) bytes")
                 
                 // Get the audio segments
+                print("Splitting audio into segments...")
                 let audioSegments = try await audioManager.splitAudioIntoTwoMinuteSegments(
                     from: audioData
                 )
+                print("Created \(audioSegments.count) audio segments")
                 
                 // Process all segments and get final response
+                print("Processing audio segments...")
                 let result = try await openAIClient.processAudioSegments(
                     audioSegments: audioSegments,
                     onUpdate: { streamUpdate in
                         Task { @MainActor in
+                            print("Received stream update: \(streamUpdate.prefix(100))...")
                             self.gptResponse = streamUpdate
                         }
                     }
                 )
                 
                 await MainActor.run {
-                    print("Transcription Result: \(result)")
-                    gptResponse = result // Update the state to show DisplayNotesCard
+                    print("Transcription completed successfully")
+                    isGenerating = false
+                    gptResponse = result
                 }
             } catch {
-                print("Error processing speech: \(error.localizedDescription)")
+                await MainActor.run {
+                    print("Error during transcription: \(error.localizedDescription)")
+                    isGenerating = false
+                    errorMessage = "Error: \(error.localizedDescription)"
+                }
             }
         }
     }

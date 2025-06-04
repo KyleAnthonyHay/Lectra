@@ -25,7 +25,7 @@ struct TVTranscriptionCard: View {
 
                     // GPT Response or Default Text
                     Markdown(transcription ?? defaultResponse)
-                        .markdownTheme(.gitHub)
+                        .markdownTheme(.lectraClearBackground)
                         .textSelection(.enabled)
                         .padding(20)
                 }

@@ -12,7 +12,7 @@ enum LectraColors {
     // MARK: - UI Colors
     
     /// Background colors
-    static let background = Color(.systemBackground)
+    static let background = Color("Background", bundle: .main)
     static let secondaryBackground = Color(.secondarySystemBackground)
     
     /// Text colors

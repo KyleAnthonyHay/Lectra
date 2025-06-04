@@ -3,7 +3,7 @@ import SwiftUI
 struct AudioUploadButton: View {
     @State private var showingDocumentPicker = false
     @State private var isUploading = false
-    @StateObject private var audioRecorder: AudioRecorderManager
+    @ObservedObject var audioRecorder: AudioRecorderManager
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var folderManager: FolderManager
     @State private var gptResponse: String? = nil
@@ -14,12 +14,12 @@ struct AudioUploadButton: View {
     let transcriptionTuple: TranscriptionTuple
     let folder: Folder
     
-    init(transcriptionTuple: TranscriptionTuple, folder: Folder, isGenerating: Binding<Bool>, isTranscribing: Binding<Bool>) {
+    init(transcriptionTuple: TranscriptionTuple, folder: Folder, audioRecorder: AudioRecorderManager, isGenerating: Binding<Bool>, isTranscribing: Binding<Bool>) {
         self.transcriptionTuple = transcriptionTuple
         self.folder = folder
+        self.audioRecorder = audioRecorder
         _isGenerating = isGenerating
         _isTranscribing = isTranscribing
-        _audioRecorder = StateObject(wrappedValue: AudioRecorderManager(transcriptionTuple: transcriptionTuple))
     }
     
     var body: some View {
@@ -66,12 +66,11 @@ struct AudioUploadButton: View {
             // Now read the data from our temporary copy
             let audioData = try Data(contentsOf: tempURL)
             
+            // Save to both file system and SwiftData
+            try audioRecorder.saveUploadedAudio(data: audioData, modelContext: modelContext, transcriptionTuple: transcriptionTuple)
+            
             // Clean up the temporary file
             try? FileManager.default.removeItem(at: tempURL)
-            
-            let audioFile = AudioFile(name: transcriptionTuple.name, audioData: audioData)
-            transcriptionTuple.audioFile = audioFile
-            try modelContext.save()
             
             // Add the tuple to the folder
             folderManager.add(tuple: transcriptionTuple, to: folder)
@@ -85,34 +84,40 @@ struct AudioUploadButton: View {
                 onUpdate: { streamUpdate in
                     Task { @MainActor in
                         gptResponse = streamUpdate
-                        // Save the transcription as it's being generated
-                        audioRecorder.saveTranscription(
-                            modelContext: modelContext,
-                            tuple: transcriptionTuple,
-                            transcription: streamUpdate
-                        )
+                        // Create and save transcription as it's being generated
+                        if transcriptionTuple.transcription == nil {
+                            let newTranscription = Transcription(associatedAudioFile: transcriptionTuple.audioFile!, text: streamUpdate)
+                            transcriptionTuple.transcription = newTranscription
+                            try? modelContext.save()
+                        } else {
+                            transcriptionTuple.transcription?.text = streamUpdate
+                            try? modelContext.save()
+                        }
                     }
                 }
             )
             
             await MainActor.run {
                 // Final save of the complete transcription
-                audioRecorder.saveTranscription(
-                    modelContext: modelContext,
-                    tuple: transcriptionTuple,
-                    transcription: result
-                )
-                isTranscribing = false  // End transcribing state
-                isGenerating = true  // Start generating state
+                if transcriptionTuple.transcription == nil {
+                    let newTranscription = Transcription(associatedAudioFile: transcriptionTuple.audioFile!, text: result)
+                    transcriptionTuple.transcription = newTranscription
+                } else {
+                    transcriptionTuple.transcription?.text = result
+                }
+                try? modelContext.save()
                 
-                // Note generation would happen here...
-                
+                // Reset all state variables
+                isTranscribing = false
+                isGenerating = false
                 isUploading = false
-                isGenerating = false  // End generating state
+                
+                // Important: Do NOT clear the audio file here since we need it for generating notes
             }
         } catch {
             print("Error handling file upload: \(error)")
             await MainActor.run {
+                // Reset all state variables on error
                 isUploading = false
                 isTranscribing = false
                 isGenerating = false
