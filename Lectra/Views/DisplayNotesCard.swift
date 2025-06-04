@@ -40,48 +40,37 @@ struct DisplayNotesCard: View {
     }
 
     var body: some View {
-        ZStack(alignment: .leading) {
-            // Background card with shadow
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.background)
-                .shadow(radius: 3)
+        VStack(alignment: .leading, spacing: 10) {
+            // GPT Response or Default Text
+            Markdown(displayText)
+                .markdownTheme(.gitHub)
+                .textSelection(.enabled)
+                .padding(.horizontal)
+                .animation(.easeInOut, value: audioManager.streamedTranscription)
 
-            // Content
-            VStack(alignment: .leading, spacing: 10) {
-                // GPT Response or Default Text
-                Markdown(displayText)
-                    .markdownTheme(.gitHub)
-                    .textSelection(.enabled)
-                    .padding(20)
-                    .animation(.easeInOut, value: audioManager.streamedTranscription)
-
-                // Save Button
-                Button(action: {
-                    saveMarkdownAsPDF(markdown: displayText) // Save as PDF
-                    // Save to swift data
-                    audioManager.saveTranscription(modelContext: modelContext, tuple: transcriptionTuple, transcription: displayText)
-                    
-                    print("Save button tapped")
-                }) {
-                    Image(systemName: "square.and.arrow.down")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(.icon)
-                        .cornerRadius(9)
-                        .shadow(radius: 5)
-                }
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.trailing, 20)
-                .padding(.bottom, 20)
+            // Save Button
+            Button(action: {
+                saveMarkdownAsPDF(markdown: displayText) // Save as PDF
+                // Save to swift data
+                audioManager.saveTranscription(modelContext: modelContext, tuple: transcriptionTuple, transcription: displayText)
+                
+                print("Save button tapped")
+            }) {
+                Image(systemName: "square.and.arrow.down")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(.icon)
+                    .cornerRadius(9)
+                    .shadow(radius: 5)
             }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.trailing)
+            .padding(.bottom)
         }
-        .frame(maxWidth: 360) // Card width is fixed, height adjusts dynamically
-        .background(Color.background)
-        .cornerRadius(16)
-        .shadow(radius: 3)
+        .padding(.top)
     }
 }
 
