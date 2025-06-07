@@ -3,10 +3,13 @@ import SwiftUI
 import AVFoundation
 import SwiftData
 
-class AudioRecorderManager: NSObject, ObservableObject {
+final class AudioRecorderManager: NSObject, ObservableObject {
+    static let shared = AudioRecorderManager()
+    private(set) var transcriptionTuple: TranscriptionTuple?
+    
     private var audioRecorder: AVAudioRecorder?
     private var audioPlayer: AVAudioPlayer?
-    private var audioFileURL: URL
+    private var audioFileURL: URL!
 
     @Published var isRecording = false
     @Published var isPlaying = false
@@ -14,10 +17,26 @@ class AudioRecorderManager: NSObject, ObservableObject {
     @Published var duration: TimeInterval = 0
     @Published var currentTime: TimeInterval = 0
     @Published var streamedTranscription: String = ""
+    @Published var isTranscribing = false
     private var timer: Timer?
     private let openAIClient = OpenAIClientWrapper()
 
-    init(transcriptionTuple: TranscriptionTuple) {
+    private override init() {
+        super.init()
+    }
+    
+    func setup(with transcriptionTuple: TranscriptionTuple) {
+        print("AudioRecorderManager: Setting up new session")
+        self.transcriptionTuple = transcriptionTuple
+        
+        // Reset all state variables
+        isRecording = false
+        isPlaying = false
+        hasRecording = false
+        duration = 0
+        currentTime = 0
+        streamedTranscription = ""
+        
         // Set the path to Documents/Transcriptions
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let audioRecordingDirectory = documentsDirectory.appending(path: "AudioRecordings")
@@ -26,18 +45,27 @@ class AudioRecorderManager: NSObject, ObservableObject {
         if !FileManager.default.fileExists(atPath: audioRecordingDirectory.path) {
             do {
                 try FileManager.default.createDirectory(at: audioRecordingDirectory, withIntermediateDirectories: true, attributes: nil)
-                print("Transcriptions directory created")
+                print("AudioRecorderManager: Transcriptions directory created")
             } catch {
-                print("Failed to create Transcriptions directory: \(error.localizedDescription)")
+                print("AudioRecorderManager: Failed to create Transcriptions directory: \(error.localizedDescription)")
             }
         }
 
         // Define the file path for recordings
         audioFileURL = audioRecordingDirectory.appendingPathComponent("Lecture-Recording.m4a")
         
-        super.init()
+        // Clean up any existing recording file
+        if FileManager.default.fileExists(atPath: audioFileURL.path) {
+            do {
+                try FileManager.default.removeItem(at: audioFileURL)
+                print("AudioRecorderManager: Removed existing recording file")
+            } catch {
+                print("AudioRecorderManager: Failed to remove existing recording: \(error.localizedDescription)")
+            }
+        }
+        
         configureAudioSession()
-        checkForExistingRecording()
+        print("AudioRecorderManager: Setup completed")
     }
 
     private func configureAudioSession() {
@@ -173,52 +201,123 @@ class AudioRecorderManager: NSObject, ObservableObject {
     }
     
     func saveTranscription(modelContext: ModelContext, tuple: TranscriptionTuple, transcription: String) {
+        print("AudioRecorderManager: Starting saveTranscription")
+        print("AudioRecorderManager: Tuple provided: \(tuple)")
+        print("AudioRecorderManager: Current transcriptionTuple: \(String(describing: transcriptionTuple))")
+        
+        guard let audioFile = tuple.audioFile else {
+            print("AudioRecorderManager: No audio file found")
+            return
+        }
+        
+        print("AudioRecorderManager: Audio file found, creating transcription")
         
         if tuple.transcription == nil {
-            let newTranscription = Transcription(associatedAudioFile: tuple.audioFile!, text: transcription)
+            let newTranscription = Transcription(associatedAudioFile: audioFile, text: transcription)
             tuple.transcription = newTranscription
+            print("AudioRecorderManager: Created new transcription")
+        } else {
+            tuple.transcription?.text = transcription
+            print("AudioRecorderManager: Updated existing transcription")
         }
         
         do {
             // Save the updated tuple in the model context.
             try modelContext.save()
-            print("Transcription updated successfully.")
+            print("AudioRecorderManager: Transcription saved successfully")
         } catch {
-            print("Error saving transcription: \(error.localizedDescription)")
+            print("AudioRecorderManager: Error saving transcription: \(error.localizedDescription)")
         }
     }
     
     func processAudioWithStreaming() async throws {
-        print("Starting audio processing with streaming...")
+        print("AudioRecorderManager: Starting audio processing with streaming...")
+        guard transcriptionTuple != nil else {
+            print("AudioRecorderManager: No transcription tuple set")
+            throw AudioError.fileNotFound
+        }
+        
         guard FileManager.default.fileExists(atPath: audioFileURL.path) else {
-            print("No audio file found at: \(audioFileURL.path)")
+            print("AudioRecorderManager: No audio file found at: \(audioFileURL.path)")
             throw AudioError.fileNotFound
         }
         
         do {
             let audioData = try getAudioData()
-            print("Audio data retrieved, size: \(audioData.count) bytes")
+            print("AudioRecorderManager: Audio data retrieved, size: \(audioData.count) bytes")
             
             let segments = try await splitAudioIntoTwoMinuteSegments(from: audioData)
-            print("Split audio into \(segments.count) segments")
+            print("AudioRecorderManager: Split audio into \(segments.count) segments")
             
             // Process segments with streaming updates
             let transcription = try await openAIClient.processAudioSegments(audioSegments: segments) { [weak self] update in
-                print("Received transcription update: \(update.prefix(100))...")
+                print("AudioRecorderManager: Received streaming update: \(update.prefix(50))...")
                 Task { @MainActor in
+                    print("AudioRecorderManager: Setting streamedTranscription on MainActor")
                     self?.streamedTranscription = update
+                    print("AudioRecorderManager: streamedTranscription set to: \(update.prefix(50))...")
                 }
             }
             
             // Final update with complete transcription
-            print("Transcription completed successfully")
+            print("AudioRecorderManager: Transcription completed successfully")
             await MainActor.run {
+                print("AudioRecorderManager: Setting final streamedTranscription")
                 self.streamedTranscription = transcription
+                print("AudioRecorderManager: Final streamedTranscription set")
             }
         } catch {
-            print("Error in processAudioWithStreaming: \(error)")
-            throw error
+            print("AudioRecorderManager: Error in processAudioWithStreaming: \(error)")
+            if let audioError = error as? AudioError {
+                throw audioError
+            } else {
+                throw AudioError.processingFailed(error)
+            }
         }
+    }
+    
+    func setupWithAudioData(tuple: TranscriptionTuple, audioData: Data) {
+        print("AudioRecorderManager: Setting up with audio data")
+        self.transcriptionTuple = tuple
+        
+        // Reset state variables
+        isRecording = false
+        isPlaying = false
+        streamedTranscription = ""
+        currentTime = 0
+        
+        // Set up the file path
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let audioRecordingDirectory = documentsDirectory.appendingPathComponent("AudioRecordings")
+        
+        // Ensure the directory exists
+        if !FileManager.default.fileExists(atPath: audioRecordingDirectory.path) {
+            do {
+                try FileManager.default.createDirectory(at: audioRecordingDirectory, withIntermediateDirectories: true, attributes: nil)
+                print("AudioRecorderManager: Created AudioRecordings directory")
+            } catch {
+                print("AudioRecorderManager: Failed to create directory: \(error.localizedDescription)")
+            }
+        }
+        
+        // Set up the audio file URL and save the data
+        audioFileURL = audioRecordingDirectory.appendingPathComponent("Lecture-Recording.m4a")
+        do {
+            try audioData.write(to: audioFileURL)
+            print("AudioRecorderManager: Saved audio data to file")
+            
+            // Set up audio player to get duration
+            let player = try AVAudioPlayer(data: audioData)
+            duration = player.duration
+            hasRecording = true
+            print("AudioRecorderManager: Successfully set up with audio duration: \(duration)")
+        } catch {
+            print("AudioRecorderManager: Failed to handle audio data: \(error.localizedDescription)")
+            hasRecording = false
+            duration = 0
+        }
+        
+        configureAudioSession()
     }
     
 }
@@ -320,5 +419,21 @@ enum AudioError: Error {
     case failedToReadData(Error)
     case failedToSplit(Error)
     case exportFailed(Error)
+    case processingFailed(Error)
+    
+    var localizedDescription: String {
+        switch self {
+        case .fileNotFound:
+            return "Audio file not found"
+        case .failedToReadData(let error):
+            return "Failed to read audio data: \(error.localizedDescription)"
+        case .failedToSplit(let error):
+            return "Failed to split audio: \(error.localizedDescription)"
+        case .exportFailed(let error):
+            return "Failed to export audio: \(error.localizedDescription)"
+        case .processingFailed(let error):
+            return "Failed to process audio: \(error.localizedDescription)"
+        }
+    }
 }
 

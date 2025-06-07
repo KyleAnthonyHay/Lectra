@@ -36,5 +36,7 @@ struct TVPlaybackCard: View {
 }
 
 #Preview {
-    TVPlaybackCard(audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple))
+    let tuple = TuplePreviewData().dummyTuple
+    AudioRecorderManager.shared.setup(with: tuple)
+    return TVPlaybackCard(audioManager: AudioRecorderManager.shared)
 }

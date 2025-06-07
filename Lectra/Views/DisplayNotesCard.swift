@@ -36,9 +36,11 @@ struct DisplayNotesCard: View {
 
     var displayText: String {
         if !audioManager.streamedTranscription.isEmpty {
+            print("DisplayNotesCard: Using streamed transcription: \(audioManager.streamedTranscription.prefix(50))...")
             return audioManager.streamedTranscription
         }
-        return gptResponse ?? defaultResponse
+        print("DisplayNotesCard: Using default or GPT response")
+        return gptResponse ?? ""
     }
 
     var body: some View {
@@ -49,6 +51,9 @@ struct DisplayNotesCard: View {
                 .textSelection(.enabled)
                 .padding(.horizontal)
                 .animation(.easeInOut, value: audioManager.streamedTranscription)
+                .onChange(of: audioManager.streamedTranscription) { oldValue, newValue in
+                    print("DisplayNotesCard: Received transcription update: \(newValue.prefix(50))...")
+                }
 
             // Save Button
             HStack {
@@ -58,9 +63,21 @@ struct DisplayNotesCard: View {
                         isSaving = true
                     }
                     
+                    print("DisplayNotesCard: Starting save process")
+                    print("DisplayNotesCard: Current transcription tuple: \(String(describing: transcriptionTuple))")
+                    print("DisplayNotesCard: AudioManager transcription tuple: \(String(describing: audioManager.transcriptionTuple))")
+                    
                     // Save actions
                     saveMarkdownAsPDF(markdown: displayText)
-                    audioManager.saveTranscription(modelContext: modelContext, tuple: transcriptionTuple, transcription: displayText)
+                    
+                    // Use the transcriptionTuple from the environment
+                    audioManager.saveTranscription(
+                        modelContext: modelContext,
+                        tuple: transcriptionTuple,
+                        transcription: displayText
+                    )
+                    
+                    print("DisplayNotesCard: Save completed")
                     
                     // Show confirmation
                     withAnimation(.easeInOut(duration: 0.3)) {
@@ -118,5 +135,7 @@ struct DisplayNotesCard: View {
 }
 
 #Preview {
-    DisplayNotesCard(gptResponse: nil, audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple))
+    let tuple = TuplePreviewData().dummyTuple
+    AudioRecorderManager.shared.setup(with: tuple)
+    return DisplayNotesCard(gptResponse: nil, audioManager: AudioRecorderManager.shared)
 }

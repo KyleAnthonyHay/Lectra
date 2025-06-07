@@ -55,7 +55,7 @@ struct EmptyFolderView: View {
             Spacer()
             
             // Add tab bar for consistency
-            TabBar(onAddButtonTapped: {
+            PlusButton(onAddButtonTapped: {
                 newRecordingName = ""
                 selectedFolder = folder
                 isShowingNewRecordingDialog = true

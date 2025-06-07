@@ -19,7 +19,7 @@ struct AudioUploadButton: View {
         self.folder = folder
         _isGenerating = isGenerating
         _isTranscribing = isTranscribing
-        _audioRecorder = StateObject(wrappedValue: AudioRecorderManager(transcriptionTuple: transcriptionTuple))
+        _audioRecorder = StateObject(wrappedValue: AudioRecorderManager.shared)
     }
     
     var body: some View {
@@ -45,7 +45,9 @@ struct AudioUploadButton: View {
     
     private func handleFileUpload(from url: URL) async {
         isUploading = true
-        isTranscribing = true  // Start transcribing state
+        await MainActor.run {
+            audioRecorder.isTranscribing = true  // Start transcribing state
+        }
         
         do {
             // Create a local copy of the file in the app's temporary directory
@@ -76,6 +78,11 @@ struct AudioUploadButton: View {
             // Add the tuple to the folder
             folderManager.add(tuple: transcriptionTuple, to: folder)
             
+            // Setup AudioRecorderManager with the audio data
+            await MainActor.run {
+                audioRecorder.setupWithAudioData(tuple: transcriptionTuple, audioData: audioData)
+            }
+            
             // Process audio segments and generate notes
             let audioSegments = try await audioRecorder.splitAudioIntoTwoMinuteSegments(from: audioData)
             
@@ -102,7 +109,8 @@ struct AudioUploadButton: View {
                     tuple: transcriptionTuple,
                     transcription: result
                 )
-                isTranscribing = false  // End transcribing state
+                audioRecorder.isTranscribing = false  // End transcribing state
+                isTranscribing = false
                 isGenerating = true  // Start generating state
                 
                 // Note generation would happen here...
@@ -114,6 +122,7 @@ struct AudioUploadButton: View {
             print("Error handling file upload: \(error)")
             await MainActor.run {
                 isUploading = false
+                audioRecorder.isTranscribing = false
                 isTranscribing = false
                 isGenerating = false
             }

@@ -20,7 +20,7 @@ struct TupleView: View {
     
     init(transcriptionTuple: TranscriptionTuple) {
         _transcriptionTuple = StateObject(wrappedValue: transcriptionTuple)
-        _audioManager = StateObject(wrappedValue: AudioRecorderManager(transcriptionTuple: transcriptionTuple))
+        _audioManager = StateObject(wrappedValue: AudioRecorderManager.shared)
 
     }
     
