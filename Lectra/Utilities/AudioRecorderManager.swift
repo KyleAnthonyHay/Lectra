@@ -71,7 +71,7 @@ final class AudioRecorderManager: NSObject, ObservableObject {
     private func configureAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .default, options: [.mixWithOthers])
+            try session.setCategory(.playAndRecord, mode: .default, options: [.mixWithOthers, .defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
             try session.setActive(true)
             print("Audio session configured successfully")
         } catch {
@@ -175,6 +175,8 @@ final class AudioRecorderManager: NSObject, ObservableObject {
         do {
             audioPlayer = try AVAudioPlayer(data: audioFile.audioData)
             audioPlayer?.delegate = self
+            // Set the duration before playing
+            duration = audioPlayer?.duration ?? 0
             audioPlayer?.play()
             isPlaying = true
             startTimer()
