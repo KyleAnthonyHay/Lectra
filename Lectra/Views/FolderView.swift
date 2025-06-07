@@ -109,7 +109,7 @@ struct FolderView: View {
                 // Add the tab bar at the bottom
                 VStack {
                     Spacer()
-                    TabBar(onAddButtonTapped: {
+                    PlusButton(onAddButtonTapped: {
                         newRecordingName = ""
                         isShowingNewRecordingDialog = true
                     })

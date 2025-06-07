@@ -137,8 +137,10 @@ struct LectureRecordCard: View {
 }
 
 #Preview {
-    LectureRecordCard(
-        audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple),
+    let tuple = TuplePreviewData().dummyTuple
+    AudioRecorderManager.shared.setup(with: tuple)
+    return LectureRecordCard(
+        audioManager: AudioRecorderManager.shared,
         folder: TuplePreviewData().dummyFolder
     )
 }

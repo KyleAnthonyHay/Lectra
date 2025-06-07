@@ -142,7 +142,7 @@ struct TranscriptionCard: View {
     init(tuple: TranscriptionTuple, folder: Folder) {
         self.tuple = tuple
         self.folder = folder
-        _audioManager = StateObject(wrappedValue: AudioRecorderManager(transcriptionTuple: tuple))
+        _audioManager = StateObject(wrappedValue: AudioRecorderManager.shared)
         let descriptor = FetchDescriptor<Folder>(sortBy: [SortDescriptor(\.name)])
         _folders = Query(descriptor)
     }

@@ -10,133 +10,122 @@ import SwiftUI
 struct GenerateNotesCard: View {
     @ObservedObject var audioManager: AudioRecorderManager
     let openAIClient: OpenAIClientWrapper
-    @State private var gptResponse: String? = nil
     @State private var isGenerating = false
     @State private var errorMessage: String? = nil
+    @State private var isVisible = false
     
     var body: some View {
-        // MARK: Generate Notes Card
-        PhaseAnimator(CardAnimationPhase.allCases) { phase in
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.background)
-                    .frame(width: 363, height: 188)
-                    .shadow(radius: 8)
-                    .cardAnimation(phase, for: .card)
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    // Header Text
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Generate Notes")
-                            .font(.custom("Inter", size: 24).weight(.heavy))
-                            .foregroundColor(.textSet)
-                            .cardAnimation(phase, for: .header)
-
-                        Text("Transcribe lectures into concise PowerPoints and detailed notes for efficient learning.")
-                            .font(.custom("Inter", size: 12))
-                            .foregroundColor(.secondary)
-                            .cardAnimation(phase, for: .subtext)
-                            
-                        if let error = errorMessage {
-                            Text(error)
-                                .font(.custom("Inter", size: 12))
-                                .foregroundColor(.red)
-                        }
-                    }
-                    .frame(width: 250)
-
-                    // Generate Button
-                    Button(action: generateNotes) {
-                        HStack(spacing: 8) {
-                            if isGenerating {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .scaleEffect(0.8)
-                            } else {
-                                Image(systemName: "sparkles")
-                                    .foregroundColor(!audioManager.hasRecording ? Color.gray : .white)
-                            }
-                            Text(isGenerating ? "Generating..." : "Generate")
-                                .font(.custom("Inter", size: 18).weight(.medium))
-                                .foregroundColor(!audioManager.hasRecording ? Color.gray : .white)
-                        }
-                        .padding()
-                        .frame(width: 292, height: 49)
-                        .background(
-                            !audioManager.hasRecording ? Color.gray.opacity(0.3) :
-                            (isGenerating ? Color.gray : Color.icon)
-                        )
-                        .cornerRadius(9)
-                        .shadow(radius: 5)
-                    }
-                    .disabled(isGenerating || !audioManager.hasRecording)
-                    .cardAnimation(phase, for: .button)
+        VStack(alignment: .leading, spacing: 16) {
+            // Header Text
+            Text("Generate Notes")
+                .font(.headline)
+                .onAppear {
+                    print("GenerateNotesCard - Header appeared")
                 }
+            
+            Text("Transform your recording into organized notes using AI")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            // Generate Button
+            Button(action: generateNotes) {
+                HStack {
+                    if isGenerating || audioManager.isTranscribing {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: "sparkles")
+                    }
+                    Text(buttonText)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(isGenerating || audioManager.isTranscribing ? Color.gray : Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .animation(.easeInOut, value: isGenerating)
+                .animation(.easeInOut, value: audioManager.isTranscribing)
             }
-            .frame(width: 363, height: 188)
-        } animation: { phase in
-            phase.animation
+            .disabled(isGenerating || audioManager.isTranscribing || !audioManager.hasRecording)
+            
+            if let error = errorMessage {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.top, 4)
+            }
+            
+            // MARK: Display Notes Card
+            if isGenerating || !audioManager.streamedTranscription.isEmpty {
+                DisplayNotesCard(gptResponse: nil, audioManager: audioManager)
+            }
         }
-        
-        // MARK: Display Notes Card
-        if let response = gptResponse {
-            DisplayNotesCard(gptResponse: response, audioManager: audioManager)
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 5)
+        .opacity(isVisible ? 1 : 0)
+        .animation(.easeIn(duration: 0.5), value: isVisible)
+        .onAppear {
+            print("GenerateNotesCard - View appeared")
+            isVisible = true
         }
     }
 
     private func generateNotes() {
+        print("GenerateNotesCard: Generate button pressed")
+        
+        // Verify AudioRecorderManager setup
+        print("GenerateNotesCard: Verifying setup - hasRecording: \(audioManager.hasRecording), transcriptionTuple: \(String(describing: audioManager.transcriptionTuple != nil))")
+        
         guard audioManager.hasRecording else {
             errorMessage = "No recording found. Please record or import audio first."
+            print("GenerateNotesCard: No recording found")
             return
         }
         
+        print("GenerateNotesCard: Starting generation, hasRecording: \(audioManager.hasRecording)")
         isGenerating = true
         errorMessage = nil
+        audioManager.streamedTranscription = "" // Reset the transcription
         
         Task {
             do {
-                print("Starting transcription process...")
-                let audioData = try audioManager.getAudioData()
-                print("Audio data retrieved, size: \(audioData.count) bytes")
-                
-                // Get the audio segments
-                print("Splitting audio into segments...")
-                let audioSegments = try await audioManager.splitAudioIntoTwoMinuteSegments(
-                    from: audioData
-                )
-                print("Created \(audioSegments.count) audio segments")
-                
-                // Process all segments and get final response
-                print("Processing audio segments...")
-                let result = try await openAIClient.processAudioSegments(
-                    audioSegments: audioSegments,
-                    onUpdate: { streamUpdate in
-                        Task { @MainActor in
-                            print("Received stream update: \(streamUpdate.prefix(100))...")
-                            self.gptResponse = streamUpdate
-                        }
-                    }
-                )
+                print("GenerateNotesCard: Calling processAudioWithStreaming")
+                try await audioManager.processAudioWithStreaming()
                 
                 await MainActor.run {
-                    print("Transcription completed successfully")
+                    print("GenerateNotesCard: Transcription completed successfully")
                     isGenerating = false
-                    gptResponse = result
                 }
             } catch {
                 await MainActor.run {
-                    print("Error during transcription: \(error.localizedDescription)")
+                    print("GenerateNotesCard: Error during transcription: \(error.localizedDescription)")
                     isGenerating = false
                     errorMessage = "Error: \(error.localizedDescription)"
                 }
             }
         }
     }
+
+    // Add computed property for button text
+    private var buttonText: String {
+        if audioManager.isTranscribing {
+            return "Transcribing..."
+        } else if isGenerating {
+            return "Generating..."
+        } else {
+            return "Generate Notes"
+        }
+    }
 }
 
 #Preview {
-    GenerateNotesCard(
-        audioManager: AudioRecorderManager(transcriptionTuple: TuplePreviewData().dummyTuple),
+    let tuple = TuplePreviewData().dummyTuple
+    AudioRecorderManager.shared.setup(with: tuple)
+    return GenerateNotesCard(
+        audioManager: AudioRecorderManager.shared,
         openAIClient: OpenAIClientWrapper()
     )
 }

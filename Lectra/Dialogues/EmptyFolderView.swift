@@ -6,9 +6,16 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EmptyFolderView: View {
     let folder: Folder
+    @State private var isShowingNewRecordingDialog = false
+    @State private var navigateToRecordView = false
+    @State private var newRecordingName = ""
+    @State private var selectedFolder: Folder? = nil
+    @State private var didConfirmRecordingCreation = false
+    @EnvironmentObject private var folderManager: FolderManager
     
     var body: some View {
         VStack(spacing: 20) {
@@ -29,7 +36,9 @@ struct EmptyFolderView: View {
                 .padding(.horizontal, 40)
             
             Button(action: {
-                // Action to create new transcription
+                newRecordingName = ""
+                selectedFolder = folder
+                isShowingNewRecordingDialog = true
             }) {
                 HStack {
                     Image(systemName: "plus")
@@ -46,13 +55,32 @@ struct EmptyFolderView: View {
             Spacer()
             
             // Add tab bar for consistency
-            TabBar(onAddButtonTapped: {
-                // Handle adding new transcription
+            PlusButton(onAddButtonTapped: {
+                newRecordingName = ""
+                selectedFolder = folder
+                isShowingNewRecordingDialog = true
             })
+        }
+        .sheet(isPresented: $isShowingNewRecordingDialog) {
+            NewRecordingDialog(
+                newRecordingName: $newRecordingName,
+                selectedFolder: $selectedFolder,
+                didConfirmCreation: $didConfirmRecordingCreation,
+                rootDirectory: folderManager.rootDirectory
+            )
+            .onDisappear {
+                if didConfirmRecordingCreation && !newRecordingName.isEmpty {
+                    navigateToRecordView = true
+                }
+            }
+        }
+        .navigationDestination(isPresented: $navigateToRecordView) {
+            RecordView(tupleName: newRecordingName, folder: selectedFolder)
         }
     }
 }
 
 #Preview {
     EmptyFolderView(folder: TuplePreviewData().dummyFolder)
+        .environmentObject(FolderManager(modelContext: ModelContext(try! ModelContainer(for: Folder.self)), rootDirectory: RootDirectory()))
 }
