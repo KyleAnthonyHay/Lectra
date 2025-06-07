@@ -74,6 +74,7 @@ struct TupleView: View {
                     }
                     .padding(.vertical)
                 }
+                .bottomBlur()
             }
             .navigationBarTitleDisplayMode(.inline)
         }
