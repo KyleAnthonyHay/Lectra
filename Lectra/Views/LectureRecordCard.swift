@@ -97,35 +97,9 @@ struct LectureRecordCard: View {
                 }
             }
             
-            // Time Display
+            // Time Display and Progress Bar
             if audioManager.hasRecording {
-                HStack {
-                    Text(formattedCurrentTime)
-                        .font(.caption)
-                        .foregroundColor(LectraColors.textSecondary)
-                    
-                    // Progress Bar
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            Rectangle()
-                                .fill(LectraColors.brandLight)
-                                .frame(height: 4)
-                                .cornerRadius(2)
-                            
-                            Rectangle()
-                                .fill(LectraColors.brand)
-                                .frame(width: geometry.size.width * (audioManager.currentTime / max(audioManager.duration, 1)))
-                                .frame(height: 4)
-                                .cornerRadius(2)
-                        }
-                    }
-                    .frame(height: 4)
-                    
-                    Text(formattedDuration)
-                        .font(.caption)
-                        .foregroundColor(LectraColors.textSecondary)
-                }
-                .padding(.horizontal)
+                AudioProgressBar(audioManager: audioManager)
             }
         }
         .padding(.vertical, 20)
