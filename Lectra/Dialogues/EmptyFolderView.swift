@@ -18,43 +18,47 @@ struct EmptyFolderView: View {
     @EnvironmentObject private var folderManager: FolderManager
     
     var body: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            
-            Image(systemName: "doc.text.magnifyingglass")
-                .font(.system(size: 70))
-                .foregroundColor(LectraColors.brandSecondary)
-            
-            Text("No Transcriptions Yet")
-                .font(.title2)
-                .fontWeight(.medium)
-            
-            Text("Tap the + button to create your first transcription in '\(folder.name)'")
-                .font(.body)
-                .foregroundColor(LectraColors.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-            
-            Button(action: {
-                newRecordingName = ""
-                selectedFolder = folder
-                isShowingNewRecordingDialog = true
-            }) {
-                HStack {
-                    Image(systemName: "plus")
-                    Text("Create Transcription")
+        ZStack(alignment: .bottom) {
+            VStack {
+                Spacer()
+                
+                VStack(spacing: 20) {
+                    Image(systemName: "doc.text.magnifyingglass")
+                        .font(.system(size: 70))
+                        .foregroundColor(LectraColors.brandSecondary)
+                    
+                    Text("No Transcriptions Yet")
+                        .font(.title2)
+                        .fontWeight(.medium)
+                    
+                    Text("Tap the + button to create your first transcription in '\(folder.name)'")
+                        .font(.body)
+                        .foregroundColor(LectraColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    
+                    Button(action: {
+                        newRecordingName = ""
+                        selectedFolder = folder
+                        isShowingNewRecordingDialog = true
+                    }) {
+                        HStack {
+                            Image(systemName: "plus")
+                            Text("Create Transcription")
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(LectraColors.brand)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                    .padding(.top, 10)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                .background(LectraColors.brand)
-                .foregroundColor(.white)
-                .cornerRadius(8)
+                
+                Spacer()
             }
-            .padding(.top, 10)
             
-            Spacer()
-            
-            // Add tab bar for consistency
+            // Plus button at the bottom
             PlusButton(onAddButtonTapped: {
                 newRecordingName = ""
                 selectedFolder = folder

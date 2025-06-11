@@ -21,7 +21,20 @@ struct FolderView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LectraColors.background.edgesIgnoringSafeArea(.all)
+                // Replace the solid background with mesh gradient
+                if #available(iOS 18.0, *) {
+                    LectraMeshGradients.mainBackground
+                        .edgesIgnoringSafeArea(.all)
+                } else {
+                    // Fallback for older iOS versions
+                    LinearGradient(
+                        colors: [.white, Color(hex: "0066FF")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .opacity(0.15)
+                    .edgesIgnoringSafeArea(.all)
+                }
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
