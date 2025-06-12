@@ -2,9 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>We need access to your microphone to record audio for lectures.</string>
-    <key>OPENAI_API_KEY</key>
-    <string>$(OPENAI_API_KEY)</string>
+	<key>ASSEMBLY_AI_API_KEY</key>
+	<string>$(ASSEMBLY_AI_API_KEY)</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone to record audio for lectures.</string>
+	<key>OPENAI_API_KEY</key>
+	<string>$(OPENAI_API_KEY)</string>
+    <key>ASSEMBLY_AI_API_KEY</key>
+    <string>$(ASSEMBLY_AI_API_KEY)</string>
 </dict>
 </plist>
