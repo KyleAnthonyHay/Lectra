@@ -10,6 +10,7 @@ struct AudioUploadButton: View {
     @Binding var isGenerating: Bool
     @Binding var isTranscribing: Bool
     private let openAIClient = OpenAIClientWrapper()
+    private let assemblyAIClient = AssemblyAIClient()
     
     let transcriptionTuple: TranscriptionTuple
     let folder: Folder
@@ -83,15 +84,47 @@ struct AudioUploadButton: View {
                 audioRecorder.setupWithAudioData(tuple: transcriptionTuple, audioData: audioData)
             }
             
-            // Process audio file directly without splitting into segments
+            // Process audio file directly using AssemblyAI for transcription
             
-            // First handle transcription
-            let result = try await openAIClient.processAudioFile(
+            // First handle transcription with AssemblyAI
+            print("Starting transcription with AssemblyAI...")
+            let transcriptionResult = try await assemblyAIClient.processAudioFile(
                 audioData: audioData,
+                onUpdate: { updateStatus in
+                    Task { @MainActor in
+                        // Save status updates during transcription process
+                        let statusMessage = "Transcription in progress: \(updateStatus)"
+                        audioRecorder.saveTranscription(
+                            modelContext: modelContext,
+                            tuple: transcriptionTuple,
+                            transcription: statusMessage
+                        )
+                    }
+                }
+            )
+            
+            print("Transcription completed! AssemblyAI result:")
+            print("--------- TRANSCRIPTION START ---------")
+            print(transcriptionResult)
+            print("--------- TRANSCRIPTION END ---------")
+            print("Sending to OpenAI for summarization...")
+            
+            // Save the raw transcription before summarizing
+            await MainActor.run {
+                audioRecorder.saveTranscription(
+                    modelContext: modelContext,
+                    tuple: transcriptionTuple,
+                    transcription: "Raw Transcription:\n\n\(transcriptionResult)"
+                )
+            }
+            
+            // Then send the transcription to OpenAI for summarization
+            let result = try await openAIClient.processChatCompletion(
+                transcription: transcriptionResult,
                 onUpdate: { streamUpdate in
                     Task { @MainActor in
                         gptResponse = streamUpdate
-                        // Save the transcription as it's being generated
+                        // Save the summary as it's being generated
                         audioRecorder.saveTranscription(
                             modelContext: modelContext,
                             tuple: transcriptionTuple,

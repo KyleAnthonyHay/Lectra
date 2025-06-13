@@ -134,6 +134,49 @@ When given the raw transcript, produce a Markdown document that matches these re
         }
     }
     
+    /// Process a text transcription through OpenAI chat completion
+    /// - Parameters:
+    ///   - transcription: The text transcription to summarize
+    ///   - onUpdate: Callback function to receive streaming updates
+    /// - Returns: The final summarized response
+    func processChatCompletion(transcription: String, onUpdate: @escaping (String) -> Void) async throws -> String {
+        print("Processing transcription for summarization, length: \(transcription.count) characters")
+        
+        do {
+            // Create chat completion parameters
+            print("Creating chat completion with transcription from AssemblyAI...")
+            let chatParameters = ChatCompletionParameters(
+                messages: [
+                    .init(role: .system, content: .text(returnMarkdown)),
+                    .init(role: .user, content: .text(transcription))
+                ],
+                model: .gpt4o
+            )
+            
+            // Start streaming chat completion
+            print("Starting chat completion stream...")
+            var fullResponse = ""
+            self.state = .processingSpeech
+            
+            let stream = try await service.startStreamedChat(parameters: chatParameters)
+            
+            for try await result in stream {
+                if let content = result.choices.first?.delta.content {
+                    fullResponse += content
+                    onUpdate(fullResponse)
+                }
+            }
+            
+            self.state = .idle
+            print("✅ Successfully completed chat completion")
+            return fullResponse
+        } catch {
+            self.state = .error(error)
+            print("❌ Error processing chat completion: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
     func cancelProcessingTask() {
         print("Cancelling processing task...")
         state = .idle
