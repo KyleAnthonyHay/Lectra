@@ -20,6 +20,7 @@ final class AudioRecorderManager: NSObject, ObservableObject {
     @Published var isTranscribing = false
     private var timer: Timer?
     private let openAIClient = OpenAIClientWrapper()
+    private let assemblyAIClient = AssemblyAIClient()
 
     private override init() {
         super.init()
@@ -248,9 +249,31 @@ final class AudioRecorderManager: NSObject, ObservableObject {
             let audioData = try getAudioData()
             print("AudioRecorderManager: Audio data retrieved, size: \(audioData.count) bytes")
             
-            // Process the complete audio file at once with streaming updates
-            let transcription = try await openAIClient.processAudioFile(audioData: audioData) { [weak self] update in
-                print("AudioRecorderManager: Received streaming update: \(update.prefix(50))...")
+            // Step 1: Process the audio file with AssemblyAI for transcription
+            print("AudioRecorderManager: Starting AssemblyAI transcription...")
+            let rawTranscription = try await assemblyAIClient.processAudioFile(audioData: audioData) { [weak self] status in
+                // Show transcription status updates
+                Task { @MainActor in
+                    print("AudioRecorderManager: Received AssemblyAI status update: \(status)")
+                    self?.streamedTranscription = "Transcription in progress: \(status)"
+                }
+            }
+            
+            // Log the raw transcription
+            print("AudioRecorderManager: AssemblyAI transcription completed successfully")
+            print("--------- TRANSCRIPTION START ---------")
+            print(rawTranscription)
+            print("--------- TRANSCRIPTION END ---------")
+            
+            // Update with raw transcription
+            await MainActor.run {
+                self.streamedTranscription = "Raw Transcription:\n\n\(rawTranscription)\n\nGenerating summary..."
+            }
+            
+            // Step 2: Process the transcription with OpenAI for summarization
+            print("AudioRecorderManager: Starting OpenAI summarization...")
+            let summary = try await openAIClient.processChatCompletion(transcription: rawTranscription) { [weak self] update in
+                print("AudioRecorderManager: Received OpenAI update: \(update.prefix(50))...")
                 Task { @MainActor in
                     print("AudioRecorderManager: Setting streamedTranscription on MainActor")
                     self?.streamedTranscription = update
@@ -258,11 +281,11 @@ final class AudioRecorderManager: NSObject, ObservableObject {
                 }
             }
             
-            // Final update with complete transcription
-            print("AudioRecorderManager: Transcription completed successfully")
+            // Final update with complete summary
+            print("AudioRecorderManager: Summary completed successfully")
             await MainActor.run {
                 print("AudioRecorderManager: Setting final streamedTranscription")
-                self.streamedTranscription = transcription
+                self.streamedTranscription = summary
                 print("AudioRecorderManager: Final streamedTranscription set")
             }
         } catch {
