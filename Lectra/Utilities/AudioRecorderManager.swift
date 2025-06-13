@@ -232,8 +232,8 @@ final class AudioRecorderManager: NSObject, ObservableObject {
         }
     }
     
-    func processAudioWithStreaming() async throws {
-        print("AudioRecorderManager: Starting audio processing with streaming...")
+    func processAudioDirectly() async throws {
+        print("AudioRecorderManager: Starting direct audio processing with streaming...")
         guard transcriptionTuple != nil else {
             print("AudioRecorderManager: No transcription tuple set")
             throw AudioError.fileNotFound
@@ -248,11 +248,8 @@ final class AudioRecorderManager: NSObject, ObservableObject {
             let audioData = try getAudioData()
             print("AudioRecorderManager: Audio data retrieved, size: \(audioData.count) bytes")
             
-            let segments = try await splitAudioIntoTwoMinuteSegments(from: audioData)
-            print("AudioRecorderManager: Split audio into \(segments.count) segments")
-            
-            // Process segments with streaming updates
-            let transcription = try await openAIClient.processAudioSegments(audioSegments: segments) { [weak self] update in
+            // Process the complete audio file at once with streaming updates
+            let transcription = try await openAIClient.processAudioFile(audioData: audioData) { [weak self] update in
                 print("AudioRecorderManager: Received streaming update: \(update.prefix(50))...")
                 Task { @MainActor in
                     print("AudioRecorderManager: Setting streamedTranscription on MainActor")
@@ -268,6 +265,33 @@ final class AudioRecorderManager: NSObject, ObservableObject {
                 self.streamedTranscription = transcription
                 print("AudioRecorderManager: Final streamedTranscription set")
             }
+        } catch {
+            print("AudioRecorderManager: Error in processAudioDirectly: \(error)")
+            if let audioError = error as? AudioError {
+                throw audioError
+            } else {
+                throw AudioError.processingFailed(error)
+            }
+        }
+    }
+    
+    func processAudioWithStreaming() async throws {
+        print("AudioRecorderManager: Starting audio processing with streaming...")
+        guard transcriptionTuple != nil else {
+            print("AudioRecorderManager: No transcription tuple set")
+            throw AudioError.fileNotFound
+        }
+        
+        guard FileManager.default.fileExists(atPath: audioFileURL.path) else {
+            print("AudioRecorderManager: No audio file found at: \(audioFileURL.path)")
+            throw AudioError.fileNotFound
+        }
+        
+        do {
+            let audioData = try getAudioData()
+            print("AudioRecorderManager: Audio data retrieved, size: \(audioData.count) bytes")
+
+            return try await processAudioDirectly()
         } catch {
             print("AudioRecorderManager: Error in processAudioWithStreaming: \(error)")
             if let audioError = error as? AudioError {
@@ -324,79 +348,6 @@ final class AudioRecorderManager: NSObject, ObservableObject {
     
 }
 
-// MARK: Audio Splitting
-extension AudioRecorderManager {
-    func splitAudioIntoTwoMinuteSegments(from audioData: Data) async throws -> [Data] {
-        print("Starting audio splitting process...")
-        
-        // Create a temporary file to work with AVAsset
-        let tempDirectory = FileManager.default.temporaryDirectory
-        let tempURL = tempDirectory.appendingPathComponent(UUID().uuidString + ".m4a")
-        
-        do {
-            try audioData.write(to: tempURL)
-            print("Temporary audio file created at: \(tempURL.path)")
-            
-            let asset = AVURLAsset(url: tempURL)
-            let duration = try await asset.load(.duration)
-            let durationInSeconds = CMTimeGetSeconds(duration)
-            print("Audio duration: \(durationInSeconds) seconds")
-            
-            let segmentDuration: Double = 120 // 2 minutes
-            let numberOfSegments = Int(ceil(durationInSeconds / segmentDuration))
-            var segments: [Data] = []
-            
-            print("Splitting into \(numberOfSegments) segments...")
-            
-            for i in 0..<numberOfSegments {
-                let startTime = Double(i) * segmentDuration
-                let segmentTime = min(segmentDuration, durationInSeconds - startTime)
-                
-                let timeRange = CMTimeRange(
-                    start: CMTime(seconds: startTime, preferredTimescale: 1000),
-                    duration: CMTime(seconds: segmentTime, preferredTimescale: 1000)
-                )
-                
-                let segmentURL = tempDirectory.appendingPathComponent("segment_\(i).m4a")
-                
-                guard let exportSession = AVAssetExportSession(
-                    asset: asset,
-                    presetName: AVAssetExportPresetAppleM4A
-                ) else {
-                    print("Failed to create export session for segment \(i)")
-                    continue
-                }
-                
-                exportSession.outputURL = segmentURL
-                exportSession.outputFileType = .m4a
-                exportSession.timeRange = timeRange
-                
-                do {
-                    print("Exporting segment \(i)...")
-                    try await exportSession.export(to: segmentURL, as: .m4a)
-                    
-                    if let segmentData = try? Data(contentsOf: segmentURL) {
-                        segments.append(segmentData)
-                        print("Successfully exported segment \(i): \(segmentData.count) bytes")
-                    }
-                } catch {
-                    print("Export error for segment \(i): \(error.localizedDescription)")
-                }
-                
-                try? FileManager.default.removeItem(at: segmentURL)
-            }
-            
-            // Clean up temporary file
-            try? FileManager.default.removeItem(at: tempURL)
-            
-            print("Audio splitting completed. Total segments: \(segments.count)")
-            return segments
-        } catch {
-            print("Error in splitAudioIntoTwoMinuteSegments: \(error)")
-            throw error
-        }
-    }
-}
 
 extension AudioRecorderManager: AVAudioRecorderDelegate, AVAudioPlayerDelegate {
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {

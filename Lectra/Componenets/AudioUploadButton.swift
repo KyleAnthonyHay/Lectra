@@ -83,12 +83,11 @@ struct AudioUploadButton: View {
                 audioRecorder.setupWithAudioData(tuple: transcriptionTuple, audioData: audioData)
             }
             
-            // Process audio segments and generate notes
-            let audioSegments = try await audioRecorder.splitAudioIntoTwoMinuteSegments(from: audioData)
+            // Process audio file directly without splitting into segments
             
             // First handle transcription
-            let result = try await openAIClient.processAudioSegments(
-                audioSegments: audioSegments,
+            let result = try await openAIClient.processAudioFile(
+                audioData: audioData,
                 onUpdate: { streamUpdate in
                     Task { @MainActor in
                         gptResponse = streamUpdate

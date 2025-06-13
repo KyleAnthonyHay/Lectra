@@ -33,6 +33,7 @@ struct DisplayNotesCard: View {
     @Environment(\.modelContext) private var modelContext
     @State private var isSaving = false
     @State private var showSaveConfirmation = false
+    @State private var hasBeenSaved = false
 
     var displayText: String {
         if !audioManager.streamedTranscription.isEmpty {
@@ -55,9 +56,10 @@ struct DisplayNotesCard: View {
                     print("DisplayNotesCard: Received transcription update: \(newValue.prefix(50))...")
                 }
 
-            // Save Button
-            HStack {
-                Spacer()
+            // Save Button - Only show if not yet saved
+            if !hasBeenSaved {
+                HStack {
+                    Spacer()
                 Button(action: {
                     withAnimation {
                         isSaving = true
@@ -84,11 +86,12 @@ struct DisplayNotesCard: View {
                         showSaveConfirmation = true
                     }
                     
-                    // Reset states after delay
+                    // Mark as saved and reset states after delay
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         withAnimation {
                             isSaving = false
                             showSaveConfirmation = false
+                            hasBeenSaved = true  // Set this to true so the button disappears
                         }
                     }
                 }) {
@@ -128,6 +131,7 @@ struct DisplayNotesCard: View {
                 .disabled(isSaving)
                 .padding(.trailing)
                 .padding(.bottom)
+                }
             }
         }
         .padding(.top)

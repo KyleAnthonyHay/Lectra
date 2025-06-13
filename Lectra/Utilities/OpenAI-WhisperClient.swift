@@ -94,51 +94,44 @@ When given the raw transcript, produce a Markdown document that matches these re
         }
     }
     
-    func processAudioSegments(audioSegments: [Data], onUpdate: @escaping (String) -> Void) async throws -> String {
-        print("Starting to process \(audioSegments.count) audio segments...")
-        var allTranscriptions: [String] = []
+    func processAudioFile(audioData: Data, onUpdate: @escaping (String) -> Void) async throws -> String {
+        print("Processing single audio file, size: \(audioData.count) bytes")
         
-        for (index, segmentData) in audioSegments.enumerated() {
-            do {
-                print("Processing segment \(index + 1)/\(audioSegments.count), size: \(segmentData.count) bytes")
-                let task = processSpeechTask(audioData: segmentData)
-                let transcription = try await task.value
-                allTranscriptions.append(transcription)
-                print("✅ Successfully processed segment \(index + 1)")
-            } catch {
-                print("❌ Error processing segment \(index + 1): \(error.localizedDescription)")
-                allTranscriptions.append("Error transcribing segment \(index + 1)")
+        do {
+            // Process the complete audio file
+            print("Processing complete audio file")
+            let task = processSpeechTask(audioData: audioData)
+            let transcription = try await task.value
+            print("✅ Successfully processed audio file")
+            
+            // Create chat completion parameters
+            print("Creating chat completion with transcription...")
+            let chatParameters = ChatCompletionParameters(
+                messages: [
+                    .init(role: .system, content: .text(returnMarkdown)),
+                    .init(role: .user, content: .text(transcription))
+                ],
+                model: .gpt4o
+            )
+            
+            // Start streaming chat completion
+            print("Starting chat completion stream...")
+            var fullResponse = ""
+            let stream = try await service.startStreamedChat(parameters: chatParameters)
+            
+            for try await result in stream {
+                if let content = result.choices.first?.delta.content {
+                    fullResponse += content
+                    onUpdate(fullResponse)
+                }
             }
+            
+            print("✅ Successfully completed chat completion")
+            return fullResponse
+        } catch {
+            print("❌ Error processing audio file: \(error.localizedDescription)")
+            throw error
         }
-        
-        // Combine all transcriptions
-        print("Combining transcriptions...")
-        let combinedTranscription = allTranscriptions.joined(separator: "\n\n")
-        
-        // Create final chat completion parameters
-        print("Creating chat completion with combined transcription...")
-        let chatParameters = ChatCompletionParameters(
-            messages: [
-                .init(role: .system, content: .text(returnMarkdown)),
-                .init(role: .user, content: .text(combinedTranscription))
-            ],
-            model: .gpt4o
-        )
-        
-        // Start streaming chat completion
-        print("Starting chat completion stream...")
-        var fullResponse = ""
-        let stream = try await service.startStreamedChat(parameters: chatParameters)
-        
-        for try await result in stream {
-            if let content = result.choices.first?.delta.content {
-                fullResponse += content
-                onUpdate(fullResponse)
-            }
-        }
-        
-        print("✅ Successfully completed chat completion")
-        return fullResponse
     }
     
     func cancelProcessingTask() {
