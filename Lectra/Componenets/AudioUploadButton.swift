@@ -1,17 +1,16 @@
 import SwiftUI
 
 struct AudioUploadButton: View {
-    @State private var showingDocumentPicker = false
-    @State private var isUploading = false
-    @StateObject private var audioRecorder: AudioRecorderManager
-    @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var folderManager: FolderManager
-    @State private var gptResponse: String? = nil
-    @Binding var isGenerating: Bool
-    @Binding var isTranscribing: Bool
     @EnvironmentObject private var openAIClient: OpenAIClientWrapper
     @EnvironmentObject private var assemblyAIClient: AssemblyAIClient
-    
+    @EnvironmentObject private var folderManager: FolderManager
+    @Environment(\.modelContext) private var modelContext
+    @State private var showingDocumentPicker = false
+    @State private var isUploading = false
+    @State private var gptResponse: String? = nil
+    @StateObject private var audioManager: AudioRecorderManager
+    @Binding var isGenerating: Bool
+    @Binding var isTranscribing: Bool
     let transcriptionTuple: TranscriptionTuple
     let folder: Folder
     
@@ -20,7 +19,7 @@ struct AudioUploadButton: View {
         self.folder = folder
         _isGenerating = isGenerating
         _isTranscribing = isTranscribing
-        _audioRecorder = StateObject(wrappedValue: AudioRecorderManager.shared)
+        _audioManager = StateObject(wrappedValue: AudioRecorderManager.shared)
     }
     
     var body: some View {
@@ -47,7 +46,7 @@ struct AudioUploadButton: View {
     private func handleFileUpload(from url: URL) async {
         isUploading = true
         await MainActor.run {
-            audioRecorder.isTranscribing = true  // Start transcribing state
+            audioManager.isTranscribing = true  // Start transcribing state
         }
         
         do {
@@ -81,7 +80,7 @@ struct AudioUploadButton: View {
             
             // Setup AudioRecorderManager with the audio data
             await MainActor.run {
-                audioRecorder.setupWithAudioData(tuple: transcriptionTuple, audioData: audioData)
+                audioManager.setupWithAudioData(tuple: transcriptionTuple, audioData: audioData)
             }
             
             // Process audio file directly using AssemblyAI for transcription
@@ -92,13 +91,9 @@ struct AudioUploadButton: View {
                 audioData: audioData,
                 onUpdate: { updateStatus in
                     Task { @MainActor in
-                        // Save status updates during transcription process
-                        let statusMessage = "Transcription in progress: \(updateStatus)"
-                        audioRecorder.saveTranscription(
-                            modelContext: modelContext,
-                            tuple: transcriptionTuple,
-                            transcription: statusMessage
-                        )
+                        // Just update UI status without saving each status update to the database
+                        // Status updates are too frequent and cause redundant database operations
+                        print("Transcription status: \(updateStatus)")
                     }
                 }
             )
@@ -109,12 +104,12 @@ struct AudioUploadButton: View {
             print("--------- TRANSCRIPTION END ---------")
             print("Sending to OpenAI for summarization...")
             
-            // Save the raw transcription before summarizing
+            // Only save the transcription once before summarization begins
             await MainActor.run {
-                audioRecorder.saveTranscription(
+                audioManager.saveTranscription(
                     modelContext: modelContext,
                     tuple: transcriptionTuple,
-                    transcription: "Raw Transcription:\n\n\(transcriptionResult)"
+                    transcription: "Raw Transcription:\n\n\(transcriptionResult)\n\nGenerating summary..."
                 )
             }
             
@@ -123,25 +118,20 @@ struct AudioUploadButton: View {
                 transcription: transcriptionResult,
                 onUpdate: { streamUpdate in
                     Task { @MainActor in
+                        // Only update the UI without saving to database on each stream update
                         gptResponse = streamUpdate
-                        // Save the summary as it's being generated
-                        audioRecorder.saveTranscription(
-                            modelContext: modelContext,
-                            tuple: transcriptionTuple,
-                            transcription: streamUpdate
-                        )
                     }
                 }
             )
             
             await MainActor.run {
-                // Final save of the complete transcription
-                audioRecorder.saveTranscription(
+                // Only save once when the full result is complete
+                audioManager.saveTranscription(
                     modelContext: modelContext,
                     tuple: transcriptionTuple,
                     transcription: result
                 )
-                audioRecorder.isTranscribing = false  // End transcribing state
+                audioManager.isTranscribing = false  // End transcribing state
                 isTranscribing = false
                 isGenerating = true  // Start generating state
                 
@@ -154,7 +144,7 @@ struct AudioUploadButton: View {
             print("Error handling file upload: \(error)")
             await MainActor.run {
                 isUploading = false
-                audioRecorder.isTranscribing = false
+                audioManager.isTranscribing = false
                 isTranscribing = false
                 isGenerating = false
             }

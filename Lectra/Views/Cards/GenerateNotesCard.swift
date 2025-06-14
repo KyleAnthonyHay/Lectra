@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct GenerateNotesCard: View {
-    @ObservedObject var audioManager: AudioRecorderManager
-    @ObservedObject var openAIClient: OpenAIClientWrapper
+    @EnvironmentObject var audioManager: AudioRecorderManager
+    @EnvironmentObject var openAIClient: OpenAIClientWrapper
     @State private var isGenerating = false
     @State private var errorMessage: String? = nil
     @State private var isVisible = false
@@ -122,9 +122,6 @@ struct GenerateNotesCard: View {
 }
 
 #Preview {
-    GenerateNotesCard(
-        audioManager: AudioRecorderManager.shared,
-        openAIClient: OpenAIClientWrapper.shared
-    )
+    GenerateNotesCard()
 }
 

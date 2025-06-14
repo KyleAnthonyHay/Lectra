@@ -10,7 +10,7 @@ import AVFoundation
 import SwiftData
 
 struct LectureRecordCard: View {
-    @ObservedObject var audioManager: AudioRecorderManager
+    @EnvironmentObject var audioManager: AudioRecorderManager
     @EnvironmentObject var transcriptionTuple: TranscriptionTuple
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var folderManager: FolderManager
@@ -111,11 +111,6 @@ struct LectureRecordCard: View {
 }
 
 #Preview {
-    let tuple = TuplePreviewData().dummyTuple
-    AudioRecorderManager.shared.setup(with: tuple)
-    return LectureRecordCard(
-        audioManager: AudioRecorderManager.shared,
-        folder: TuplePreviewData().dummyFolder
-    )
+    LectureRecordCard(folder: TuplePreviewData().dummyFolder)
 }
 
