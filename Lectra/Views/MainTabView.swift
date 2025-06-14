@@ -7,8 +7,15 @@
 
 import SwiftUI
 import SwiftData
+import Foundation
+
+// Clients will be initialized as StateObjects in MainTabView
 
 struct MainTabView: View {
+    // Initialize API clients as StateObjects to ensure they're created only once
+    @StateObject private var openAIClient = OpenAIClientWrapper.shared
+    @StateObject private var assemblyAIClient = AssemblyAIClient.shared
+    
     @Query(FetchDescriptor<RootDirectory>()) private var rootDirectories: [RootDirectory]
     @Environment(\.modelContext) private var modelContext
 
@@ -38,7 +45,10 @@ struct MainTabView: View {
     var body: some View {
         // T3: Update the folderManager with the correct context and root directory
         let _ = folderManager.updateContext(modelContext: modelContext, rootDirectory: rootDirectory)
-        FolderView(rootDirectory: rootDirectory).environmentObject(folderManager)
+        FolderView(rootDirectory: rootDirectory)
+            .environmentObject(folderManager)
+            .environmentObject(openAIClient)
+            .environmentObject(assemblyAIClient)
     }
 }
 

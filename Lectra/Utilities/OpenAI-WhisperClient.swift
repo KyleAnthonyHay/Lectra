@@ -7,8 +7,12 @@
 
 import Foundation
 import SwiftOpenAI
+import SwiftUI
 
-class OpenAIClientWrapper {
+class OpenAIClientWrapper: ObservableObject {
+    // Singleton instance
+    static let shared = OpenAIClientWrapper()
+    
     private let service: OpenAIService
     private let returnMarkdown: String = """
 You are a Christian sermon note-taking assistant. When summarizing transcripts, follow these rules exactly:
@@ -37,7 +41,7 @@ When given the raw transcript, produce a Markdown document that matches these re
 """
     private(set) var state: AudioProcessingState = .idle
     
-    init() {
+    private init() {
         print("Initializing OpenAIClientWrapper...")
         
         // Try to get API key from environment first

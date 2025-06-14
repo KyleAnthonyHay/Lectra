@@ -41,7 +41,7 @@ extension View {
 }
 
 struct RecordView: View {
-    private let openAIClient = OpenAIClientWrapper()
+    @EnvironmentObject var openAIClient: OpenAIClientWrapper
     @State private var isTranscribing = false
     @StateObject var transcriptionTuple: TranscriptionTuple
     @StateObject var audioManager: AudioRecorderManager

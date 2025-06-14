@@ -9,8 +9,8 @@ struct AudioUploadButton: View {
     @State private var gptResponse: String? = nil
     @Binding var isGenerating: Bool
     @Binding var isTranscribing: Bool
-    private let openAIClient = OpenAIClientWrapper()
-    private let assemblyAIClient = AssemblyAIClient()
+    @EnvironmentObject private var openAIClient: OpenAIClientWrapper
+    @EnvironmentObject private var assemblyAIClient: AssemblyAIClient
     
     let transcriptionTuple: TranscriptionTuple
     let folder: Folder

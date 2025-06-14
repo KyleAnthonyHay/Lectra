@@ -9,7 +9,7 @@ import SwiftUI
 
 struct GenerateNotesCard: View {
     @ObservedObject var audioManager: AudioRecorderManager
-    let openAIClient: OpenAIClientWrapper
+    @ObservedObject var openAIClient: OpenAIClientWrapper
     @State private var isGenerating = false
     @State private var errorMessage: String? = nil
     @State private var isVisible = false
@@ -122,11 +122,9 @@ struct GenerateNotesCard: View {
 }
 
 #Preview {
-    let tuple = TuplePreviewData().dummyTuple
-    AudioRecorderManager.shared.setup(with: tuple)
-    return GenerateNotesCard(
+    GenerateNotesCard(
         audioManager: AudioRecorderManager.shared,
-        openAIClient: OpenAIClientWrapper()
+        openAIClient: OpenAIClientWrapper.shared
     )
 }
 

@@ -6,14 +6,18 @@
 //
 
 import Foundation
+import SwiftUI
 
-class AssemblyAIClient {
+class AssemblyAIClient: ObservableObject {
+    // Singleton instance
+    static let shared = AssemblyAIClient()
+    
     private let apiKey: String
     private let uploadEndpoint = "https://api.assemblyai.com/v2/upload"
     private let transcriptEndpoint = "https://api.assemblyai.com/v2/transcript"
     private(set) var state: AudioProcessingState = .idle
     
-    init() {
+    private init() {
         print("Initializing AssemblyAIClient...")
         
         // Try to get API key from environment first

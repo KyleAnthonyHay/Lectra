@@ -19,11 +19,15 @@ final class AudioRecorderManager: NSObject, ObservableObject {
     @Published var streamedTranscription: String = ""
     @Published var isTranscribing = false
     private var timer: Timer?
-    private let openAIClient = OpenAIClientWrapper()
-    private let assemblyAIClient = AssemblyAIClient()
+    private let openAIClient: OpenAIClientWrapper
+    private let assemblyAIClient: AssemblyAIClient
 
-    private override init() {
+    private init(openAIClient: OpenAIClientWrapper = OpenAIClientWrapper.shared,
+                 assemblyAIClient: AssemblyAIClient = AssemblyAIClient.shared) {
+        self.openAIClient = openAIClient
+        self.assemblyAIClient = assemblyAIClient
         super.init()
+        print("AudioRecorderManager initialized with API clients")
     }
     
     func setup(with transcriptionTuple: TranscriptionTuple) {
